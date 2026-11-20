@@ -325,6 +325,28 @@ main { position: relative; z-index: 1; }
 .more[hidden] { display: none; }
 .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 10px 0; list-style: none; width: 100%; }
 
+/* 배경 음악 미니 플레이어 */
+.bgm {
+  position: fixed; left: 14px; bottom: 14px; z-index: 30;
+  width: 240px; border-radius: 14px; overflow: hidden;
+  background: rgba(12, 7, 24, .92); border: 1px solid var(--line);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, .5), 0 0 24px var(--glow);
+  animation: popin .5s var(--ease) both;
+}
+.bgm[hidden] { display: none; }
+.bgm-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: 11px; letter-spacing: .08em; }
+.bgm-title { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+.bgm-title b { color: var(--ink); }
+.bgm-close { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 13px; padding: 0 2px; }
+.bgm-eq { display: flex; gap: 2px; align-items: flex-end; height: 12px; }
+.bgm-eq i { width: 3px; background: var(--light); animation: eq 1s ease-in-out infinite; }
+.bgm-eq i:nth-child(2) { animation-delay: -.3s; }
+.bgm-eq i:nth-child(3) { animation-delay: -.6s; }
+@keyframes eq { 0%, 100% { height: 3px; } 50% { height: 12px; } }
+.bgm-frame { position: relative; aspect-ratio: 16 / 9; }
+.bgm-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.footer { padding-bottom: 200px !important; }
+
 .footer { position: relative; z-index: 2; text-align: center; padding: 30px 20px 60px; font-size: 12px; color: var(--muted); }
 .footer p { margin: 2px 0; }
 
@@ -333,6 +355,7 @@ main { position: relative; z-index: 1; }
   .ticket-stub { width: 96px; }
   .block { padding: 22px 16px; margin: 44px auto; }
   .runway { height: 160px; }
+  .bgm { width: 200px; left: 10px; bottom: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .beams i, .ticket { animation: none; }
@@ -469,6 +492,15 @@ main { position: relative; z-index: 1; }
     </section>
   </main>
 
+  <aside class="bgm" id="bgm" hidden aria-label="배경 음악">
+    <div class="bgm-head">
+      <span class="bgm-eq" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="bgm-title">NOW PLAYING · <b id="bgm-title"></b></span>
+      <button type="button" class="bgm-close" id="bgm-close" aria-label="음악 끄기">✕</button>
+    </div>
+    <div class="bgm-frame" id="bgm-frame"></div>
+  </aside>
+
   <footer class="footer">
     <p>팬이 만든 생일 축하 공간입니다. 아티스트·소속사의 공식 서비스가 아닙니다.</p>
     <p>글에 개인정보를 적지 말아 주세요. 남긴 글은 모두에게 공개돼요.</p>
@@ -486,6 +518,9 @@ window.SITE = {
   // 방명록 저장소 (Supabase) — 바꾸지 마세요
   supabaseUrl: "https://dztjiykydhreczyrcffy.supabase.co",
   supabaseKey: "sb_publishable_893er2-bWvBC8h1ZBf2OKQ_kV4kPrZw",
+
+  // 입장하면 흘러나오는 첫 노래 (유튜브 주소)
+  bgm: { title: "HOME", url: "https://www.youtube.com/watch?v=iJYYqKi5J6c" },
 
   // 전광판 사진: photos 폴더에 jpg를 넣고 파일 이름을 적어 주세요
   // 예: photos: ["photos/01.jpg", "photos/02.jpg"]
@@ -545,7 +580,27 @@ window.SITE = {
     gate.classList.add("hide");
     document.body.classList.remove("locked");
     try { sessionStorage.setItem("entered", "1"); } catch {}
+    startBgm();
   });
+
+  /* ---------- 입장 배경 음악 ---------- */
+  const bgmBox = $("#bgm"), bgmFrame = $("#bgm-frame");
+  function startBgm() {
+    const id = S.bgm && ytId(S.bgm.url);
+    if (!id) return;
+    $("#bgm-title").textContent = S.bgm.title || "";
+    bgmFrame.innerHTML = "";
+    const f = document.createElement("iframe");
+    f.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1`;
+    f.title = S.bgm.title || "배경 음악";
+    f.allow = "autoplay; encrypted-media; picture-in-picture";
+    bgmFrame.appendChild(f);
+    bgmBox.hidden = false;
+  }
+  function stopBgm() { bgmFrame.innerHTML = ""; bgmBox.hidden = true; }
+  $("#bgm-close").addEventListener("click", stopBgm);
+  // 이미 입장한 상태로 새로고침했을 때는 플레이어만 보여 주고 누르면 재생
+  if (entered && S.bgm && ytId(S.bgm.url)) startBgm();
 
   /* ---------- 조명 전환 ---------- */
   function setTheme(t) {
@@ -637,6 +692,7 @@ window.SITE = {
     $(".tag", li).textContent = id ? "▶ 재생" : "영상 준비 중";
     const play = () => {
       if (!id) return;
+      stopBgm();
       $$(".setlist li").forEach((x) => x.classList.remove("playing"));
       li.classList.add("playing");
       player.hidden = false;
