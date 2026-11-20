@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>HAPPY BIRTHDAY — 생일 축하 공연</title>
+  <meta name="description" content="팬들이 함께 만드는 생일 축하 공연장. 응원 슬로건과 팬레터를 남겨 주세요." />
+  <meta property="og:title" content="HAPPY BIRTHDAY — 생일 축하 공연" />
+  <meta property="og:description" content="팬들이 함께 만드는 생일 축하 공연장. 응원 슬로건과 팬레터를 남겨 주세요." />
+  <meta name="theme-color" content="#07040f" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Brush+Script&family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet" />
+  <style>
+:root {
+  --bg: #07040f;
+  --ink: #f4f0ff;
+  --muted: #a99fc4;
+  --panel: rgba(20, 12, 38, 0.72);
+  --line: rgba(255, 255, 255, 0.12);
+  --ease: cubic-bezier(.2, .7, .2, 1);
+}
+body.theme-pink {
+  --light: #ff3fa8;
+  --light-2: #c24dff;
+  --glow: rgba(255, 63, 168, 0.55);
+  --floor: #2a0a26;
+}
+body.theme-blue {
+  --light: #3d8bff;
+  --light-2: #7b5cff;
+  --glow: rgba(61, 139, 255, 0.55);
+  --floor: #08102e;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Noto Sans KR", system-ui, sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  overflow-x: hidden;
+  transition: background-color .8s var(--ease);
+}
+body.locked { overflow: hidden; }
+button, input, textarea { font: inherit; color: inherit; }
+
+/* ---------- 객석 & 빔 ---------- */
+#crowd {
+  position: fixed; inset: 0; width: 100%; height: 100%;
+  z-index: 0; pointer-events: none;
+}
+.beams { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.beams i {
+  position: absolute; top: -10%; width: 3px; height: 130%;
+  background: linear-gradient(to bottom, var(--light), transparent 75%);
+  opacity: .35; filter: blur(1px);
+  transform-origin: top center;
+  animation: sweep 9s ease-in-out infinite alternate;
+  transition: background .8s var(--ease);
+}
+.beams i:nth-child(1) { left: 18%; animation-delay: -1s; }
+.beams i:nth-child(2) { left: 38%; animation-delay: -4s; animation-duration: 11s; }
+.beams i:nth-child(3) { left: 62%; animation-delay: -2s; animation-duration: 10s; }
+.beams i:nth-child(4) { left: 82%; animation-delay: -6s; }
+@keyframes sweep { from { transform: rotate(-22deg); } to { transform: rotate(22deg); } }
+
+/* ---------- 입장 티켓 ---------- */
+.gate {
+  position: fixed; inset: 0; z-index: 50;
+  display: grid; place-items: center; align-content: center; gap: 18px;
+  padding: 24px;
+  background: radial-gradient(ellipse at 50% 30%, rgba(60, 20, 90, .7), rgba(5, 3, 12, .97) 70%);
+  backdrop-filter: blur(4px);
+  transition: opacity .7s var(--ease), visibility .7s;
+}
+.gate.hide { opacity: 0; visibility: hidden; }
+.ticket {
+  display: flex; width: min(560px, 100%);
+  border-radius: 16px; overflow: hidden;
+  background: linear-gradient(135deg, #fff 0%, #f4ecff 100%);
+  color: #1a0f2e;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .6), 0 0 60px var(--glow);
+  animation: rise .9s var(--ease) both;
+}
+@keyframes rise { from { transform: translateY(30px) rotate(-2deg); opacity: 0; } to { transform: none; opacity: 1; } }
+.ticket-main { flex: 1; padding: 24px 22px; }
+.ticket-label { margin: 0 0 6px; font-size: 11px; letter-spacing: .2em; color: #7a6a99; font-weight: 700; }
+.ticket-title { margin: 0 0 16px; font-size: clamp(24px, 6vw, 34px); line-height: 1.1; font-weight: 900; letter-spacing: -.01em; }
+.ticket-info { margin: 0; display: grid; gap: 6px; }
+.ticket-info div { display: flex; gap: 12px; font-size: 13px; }
+.ticket-info dt { width: 42px; color: #7a6a99; font-weight: 700; letter-spacing: .1em; }
+.ticket-info dd { margin: 0; font-weight: 700; }
+.ticket-stub {
+  width: 128px; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  border-left: 2px dashed #c9b8e6;
+  background: linear-gradient(180deg, var(--light), var(--light-2));
+  position: relative;
+}
+.ticket-stub::before, .ticket-stub::after {
+  content: ""; position: absolute; left: -11px; width: 20px; height: 20px; border-radius: 50%; background: #0c0718;
+}
+.ticket-stub::before { top: -10px; }
+.ticket-stub::after { bottom: -10px; }
+.enter-btn {
+  writing-mode: vertical-rl; text-orientation: upright;
+  border: 0; background: #fff; color: #1a0f2e;
+  padding: 14px 8px; border-radius: 10px; font-weight: 900; letter-spacing: .2em; cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .25);
+  transition: transform .2s var(--ease);
+}
+.enter-btn:hover { transform: scale(1.05); }
+.stub-no { margin: 0; font-size: 11px; color: #fff; font-weight: 700; letter-spacing: .1em; }
+.gate-note { margin: 0; max-width: 520px; text-align: center; font-size: 12px; color: var(--muted); }
+
+/* ---------- 상단 바 ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px;
+  background: linear-gradient(to bottom, rgba(7, 4, 15, .9), rgba(7, 4, 15, 0));
+}
+.brand { font-weight: 900; letter-spacing: .14em; font-size: 13px; }
+.light-switch { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(255, 255, 255, .08); border: 1px solid var(--line); }
+.light-switch button {
+  border: 0; background: transparent; padding: 6px 12px; border-radius: 999px;
+  font-size: 12px; font-weight: 700; letter-spacing: .1em; cursor: pointer; color: var(--muted);
+}
+.light-switch button[data-theme="pink"].active { background: #ff3fa8; color: #fff; box-shadow: 0 0 16px #ff3fa8; }
+.light-switch button[data-theme="blue"].active { background: #3d8bff; color: #fff; box-shadow: 0 0 16px #3d8bff; }
+
+main { position: relative; z-index: 1; }
+
+/* ---------- 무대 ---------- */
+.stage {
+  position: relative;
+  padding: 10px 14px 0;
+  display: flex; flex-direction: column; align-items: center;
+}
+.screen {
+  position: relative; z-index: 2;
+  width: min(1100px, 100%);
+  aspect-ratio: 3.2 / 1;
+  border-radius: 50%;
+  padding: 6px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, .1));
+  box-shadow: 0 0 60px var(--glow), 0 0 140px var(--glow);
+  transition: box-shadow .8s var(--ease);
+}
+.screen-inner {
+  position: relative; width: 100%; height: 100%;
+  border-radius: 50%; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 60%, var(--light-2), #0b0618 72%);
+  transition: background .8s var(--ease);
+}
+.screen-inner img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  opacity: 0; transform: scale(1.06);
+  transition: opacity 1.4s var(--ease), transform 6s linear;
+}
+.screen-inner img.on { opacity: 1; transform: scale(1); }
+.screen-placeholder {
+  position: absolute; inset: 0;
+  display: grid; grid-template-columns: 1fr clamp(70px, 14vw, 160px) 1fr; align-items: center;
+  text-align: center;
+}
+.screen-placeholder .brush:first-child { text-align: right; }
+.screen-placeholder .brush:last-child { text-align: left; }
+.brush {
+  margin: 0; font-family: "Nanum Brush Script", cursive;
+  font-size: clamp(30px, 9vw, 110px); line-height: 1; color: #fff; padding: 0 4px;
+  text-shadow: 0 0 24px var(--light);
+}
+.screen-sub { margin: 4px 0 0; font-size: clamp(11px, 2vw, 15px); color: rgba(255, 255, 255, .75); }
+.screen-glare {
+  position: absolute; inset: 6px; border-radius: 50%; pointer-events: none;
+  background: linear-gradient(170deg, rgba(255, 255, 255, .18), transparent 40%);
+}
+.truss {
+  position: relative; z-index: 3;
+  width: clamp(90px, 16vw, 180px); height: clamp(140px, 26vw, 300px);
+  margin-top: calc(clamp(140px, 26vw, 300px) * -0.82);
+  color: rgba(235, 228, 255, .85);
+  filter: drop-shadow(0 0 10px var(--glow));
+  pointer-events: none;
+}
+.stage-floor { position: relative; z-index: 2; margin-top: -10px; width: 100%; display: grid; place-items: center; }
+.main-circle {
+  width: clamp(200px, 44vw, 380px); aspect-ratio: 2.4 / 1; border-radius: 50%;
+  display: grid; place-content: center; text-align: center;
+  background: radial-gradient(ellipse, var(--floor), #05030b 80%);
+  border: 2px solid rgba(255, 255, 255, .5);
+  box-shadow: 0 0 40px var(--glow), inset 0 0 40px var(--glow);
+  transition: background .8s var(--ease), box-shadow .8s var(--ease);
+}
+.dday { margin: 0; font-weight: 900; font-size: clamp(24px, 6vw, 44px); letter-spacing: .04em; line-height: 1.1; }
+.dday-sub { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+
+/* ---------- 런웨이 ---------- */
+.runway {
+  position: relative; z-index: 1;
+  width: clamp(70px, 12vw, 120px); height: 220px; margin: -6px auto 0;
+  background: linear-gradient(180deg, #120a22, #0a0614);
+  border-left: 2px solid rgba(255, 255, 255, .35);
+  border-right: 2px solid rgba(255, 255, 255, .35);
+  box-shadow: 0 0 30px var(--glow);
+}
+.runway svg { width: 100%; height: 100%; display: block; }
+.sub-stage {
+  position: relative; z-index: 1;
+  width: clamp(110px, 22vw, 200px); aspect-ratio: 1; border-radius: 50%; margin: 0 auto;
+  background: radial-gradient(circle, var(--floor), #06030c 75%);
+  border: 2px solid rgba(255, 255, 255, .45);
+  box-shadow: 0 0 40px var(--glow);
+  transition: background .8s var(--ease);
+}
+.sub-stage::before, .sub-stage::after {
+  content: ""; position: absolute; left: 50%; width: 3px; height: 60px; transform: translateX(-50%);
+  background: rgba(255, 255, 255, .35);
+}
+.sub-stage::before { bottom: 100%; }
+.sub-stage::after { top: 100%; }
+
+/* ---------- 블록 공통 ---------- */
+.block {
+  position: relative; z-index: 2;
+  width: min(760px, calc(100% - 28px)); margin: 60px auto;
+  padding: 28px 22px;
+  border-radius: 20px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
+}
+.block-head { text-align: center; margin-bottom: 20px; }
+.eyebrow { margin: 0; font-size: 12px; letter-spacing: .3em; font-weight: 700; color: var(--light); transition: color .8s; }
+.block h2 { margin: 2px 0 6px; font-size: clamp(22px, 5vw, 30px); font-weight: 900; }
+.desc { margin: 0; color: var(--muted); font-size: 14px; }
+
+/* 셋리스트 */
+.setlist { list-style: none; margin: 0; padding: 0; counter-reset: song; }
+.setlist li {
+  counter-increment: song;
+  display: flex; align-items: center; gap: 14px;
+  padding: 13px 14px; border-radius: 12px; cursor: pointer;
+  border: 1px solid transparent;
+  transition: background .2s, border-color .2s;
+}
+.setlist li::before {
+  content: counter(song, decimal-leading-zero);
+  font-weight: 900; color: var(--light); width: 26px; font-size: 14px; transition: color .8s;
+}
+.setlist li:hover, .setlist li:focus-visible { background: rgba(255, 255, 255, .06); outline: none; }
+.setlist li.playing { border-color: var(--light); background: rgba(255, 255, 255, .08); }
+.setlist .song { flex: 1; font-weight: 700; }
+.setlist .tag { font-size: 12px; color: var(--muted); }
+.player {
+  position: relative; aspect-ratio: 16 / 9; margin-bottom: 16px;
+  border-radius: 14px; overflow: hidden; border: 1px solid var(--line);
+  box-shadow: 0 0 40px var(--glow);
+}
+.player iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+/* 폼 */
+.post-form { display: grid; gap: 10px; margin-bottom: 22px; }
+.post-form .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.post-form input, .post-form textarea {
+  width: 100%; padding: 12px 14px; border-radius: 12px;
+  background: rgba(0, 0, 0, .35); border: 1px solid var(--line);
+  outline: none; transition: border-color .2s;
+  resize: vertical;
+}
+.post-form input:focus, .post-form textarea:focus { border-color: var(--light); }
+.post-form button {
+  padding: 13px; border: 0; border-radius: 12px; cursor: pointer;
+  font-weight: 900; letter-spacing: .05em; color: #fff;
+  background: linear-gradient(90deg, var(--light), var(--light-2));
+  box-shadow: 0 0 24px var(--glow);
+  transition: transform .15s, opacity .2s;
+}
+.post-form button:active { transform: scale(.98); }
+.post-form button:disabled { opacity: .5; cursor: wait; }
+.form-msg { margin: 0; min-height: 1.2em; font-size: 13px; color: var(--muted); text-align: center; }
+
+/* 슬로건 */
+.slogans { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.slogans li {
+  position: relative;
+  padding: 12px 16px 10px; border-radius: 6px;
+  background: #fff; color: #150b28;
+  box-shadow: 0 0 18px var(--glow);
+  transform: rotate(var(--tilt, 0deg));
+  max-width: 100%;
+  animation: popin .5s var(--ease) both;
+}
+.slogans .msg { display: block; font-weight: 900; font-size: 16px; line-height: 1.35; word-break: keep-all; overflow-wrap: anywhere; }
+.slogans .who { display: block; margin-top: 4px; font-size: 11px; color: #6b5c8a; }
+@keyframes popin { from { transform: scale(.8); opacity: 0; } }
+
+/* 편지 */
+.letters { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.letters li {
+  padding: 16px 18px; border-radius: 14px;
+  background: rgba(255, 255, 255, .05); border: 1px solid var(--line);
+  animation: popin .5s var(--ease) both;
+}
+.letters .head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin-bottom: 6px; }
+.letters .who { font-weight: 700; color: var(--light); transition: color .8s; }
+.letters .when { font-size: 12px; color: var(--muted); }
+.letters .msg { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.del {
+  border: 0; background: none; cursor: pointer; padding: 0 0 0 6px;
+  font-size: 11px; color: #9a8db8; text-decoration: underline;
+}
+.slogans .del { color: #8a7ca8; }
+.more {
+  display: block; margin: 18px auto 0; padding: 10px 22px; border-radius: 999px; cursor: pointer;
+  background: transparent; border: 1px solid var(--line); color: var(--ink); font-weight: 700;
+}
+.more[hidden] { display: none; }
+.empty { text-align: center; color: var(--muted); font-size: 14px; padding: 10px 0; list-style: none; width: 100%; }
+
+.footer { position: relative; z-index: 2; text-align: center; padding: 30px 20px 60px; font-size: 12px; color: var(--muted); }
+.footer p { margin: 2px 0; }
+
+@media (max-width: 560px) {
+  .post-form .row { grid-template-columns: 1fr; }
+  .ticket-stub { width: 96px; }
+  .block { padding: 22px 16px; margin: 44px auto; }
+  .runway { height: 160px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .beams i, .ticket { animation: none; }
+  .screen-inner img { transition: opacity .3s; transform: none; }
+}
+
+</style>
+</head>
+<body class="theme-pink">
+  <!-- 객석 메리엘 불빛 -->
+  <canvas id="crowd" aria-hidden="true"></canvas>
+  <div class="beams" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+  <!-- 입장 티켓 -->
+  <div id="ticket-gate" class="gate" role="dialog" aria-label="입장 티켓">
+    <div class="ticket">
+      <div class="ticket-main">
+        <p class="ticket-label">ADMIT ONE · FAN MADE</p>
+        <h1 class="ticket-title"><span class="artist-name"></span><br />BIRTHDAY LIVE</h1>
+        <dl class="ticket-info">
+          <div><dt>DATE</dt><dd class="birthday-text"></dd></div>
+          <div><dt>SEAT</dt><dd>어디서든 · 전석 무료</dd></div>
+          <div><dt>GATE</dt><dd>ONLINE</dd></div>
+        </dl>
+      </div>
+      <div class="ticket-stub">
+        <button id="enter-btn" class="enter-btn">입장하기</button>
+        <p class="stub-no">No. <span id="ticket-no">0001</span></p>
+      </div>
+    </div>
+    <p class="gate-note">팬이 만든 생일 축하 공간입니다. 아티스트·소속사의 공식 서비스가 아닙니다.</p>
+  </div>
+
+  <header class="topbar">
+    <span class="brand">HBD · <span class="artist-name"></span></span>
+    <div class="light-switch" role="group" aria-label="조명 색 바꾸기">
+      <button data-theme="pink" class="active" aria-pressed="true">PINK</button>
+      <button data-theme="blue" aria-pressed="false">BLUE</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- 무대: 타원 스크린 + 삼각 트러스 -->
+    <section class="stage" aria-label="메인 무대">
+      <div class="screen">
+        <div class="screen-inner" id="screen">
+          <div class="screen-placeholder">
+            <p class="brush">Happy</p>
+            <span></span>
+            <p class="brush">Birthday</p>
+          </div>
+        </div>
+        <div class="screen-glare"></div>
+      </div>
+      <svg class="truss" viewBox="0 0 200 260" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <pattern id="lattice" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="14" stroke="currentColor" stroke-width="1.2" />
+            <line x1="0" y1="0" x2="14" y2="0" stroke="currentColor" stroke-width="1.2" />
+          </pattern>
+        </defs>
+        <polygon points="100,4 18,256 40,256 100,40 160,256 182,256" fill="url(#lattice)" stroke="currentColor" stroke-width="2" />
+      </svg>
+      <div class="stage-floor">
+        <div class="main-circle">
+          <p class="dday" id="dday">D-?</p>
+          <p class="dday-sub" id="dday-sub"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 런웨이 -->
+    <div class="runway" aria-hidden="true">
+      <svg viewBox="0 0 100 600" preserveAspectRatio="none">
+        <path d="M60 0 C 20 60, 80 110, 45 170 S 30 260, 62 300 S 40 420, 55 470 S 30 560, 50 600"
+              fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity=".85" />
+        <path d="M58 40 C 40 80, 66 120, 50 150" fill="none" stroke="#fff" stroke-width="3" opacity=".5" />
+      </svg>
+    </div>
+
+    <!-- 셋리스트 -->
+    <section class="block" id="setlist-sec">
+      <div class="block-head">
+        <p class="eyebrow">SET LIST</p>
+        <h2>오늘의 셋리스트</h2>
+        <p class="desc">곡을 누르면 무대에서 영상이 흘러나와요.</p>
+      </div>
+      <div class="player" id="player" hidden></div>
+      <ol class="setlist" id="setlist"></ol>
+    </section>
+
+    <div class="sub-stage" aria-hidden="true"></div>
+
+    <!-- 응원 슬로건 -->
+    <section class="block" id="slogan-sec">
+      <div class="block-head">
+        <p class="eyebrow">SLOGAN</p>
+        <h2>응원 슬로건</h2>
+        <p class="desc">객석에서 높이 들어 올릴 한 줄 응원을 남겨 주세요. <span class="lights-count"></span></p>
+      </div>
+      <form class="post-form" data-kind="ilchon" autocomplete="off">
+        <div class="row">
+          <input name="nickname" maxlength="20" placeholder="닉네임" required />
+          <input name="password" type="password" maxlength="30" minlength="4" placeholder="비밀번호 (삭제용, 4자 이상)" required />
+        </div>
+        <input name="message" maxlength="40" placeholder="한 줄 응원 (40자까지)" required />
+        <button type="submit">슬로건 올리기</button>
+        <p class="form-msg" role="status"></p>
+      </form>
+      <ul class="slogans" id="slogans"></ul>
+      <button class="more" data-more="ilchon" hidden>더 보기</button>
+    </section>
+
+    <div class="sub-stage" aria-hidden="true"></div>
+
+    <!-- 팬레터함 -->
+    <section class="block" id="letter-sec">
+      <div class="block-head">
+        <p class="eyebrow">FAN LETTER</p>
+        <h2>팬레터함</h2>
+        <p class="desc">생일 축하 편지를 남겨 주세요. 모두가 함께 읽을 수 있어요.</p>
+      </div>
+      <form class="post-form" data-kind="guestbook" autocomplete="off">
+        <div class="row">
+          <input name="nickname" maxlength="20" placeholder="닉네임" required />
+          <input name="password" type="password" maxlength="30" minlength="4" placeholder="비밀번호 (삭제용, 4자 이상)" required />
+        </div>
+        <textarea name="message" maxlength="2000" rows="5" placeholder="편지를 적어 주세요 (2000자까지)" required></textarea>
+        <button type="submit">편지 보내기</button>
+        <p class="form-msg" role="status"></p>
+      </form>
+      <ul class="letters" id="letters"></ul>
+      <button class="more" data-more="guestbook" hidden>더 보기</button>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>팬이 만든 생일 축하 공간입니다. 아티스트·소속사의 공식 서비스가 아닙니다.</p>
+    <p>글에 개인정보를 적지 말아 주세요. 남긴 글은 모두에게 공개돼요.</p>
+  </footer>
+
+  <script>
+// ============================================================
+//  여기만 고치면 내용이 바뀌어요
+// ============================================================
+window.SITE = {
+  // 사이트 위쪽에 나오는 이름과 생일
+  artist: "박효신",
+  birthday: "2026-12-01T00:00:00+09:00",
+
+  // 방명록 저장소 (Supabase) — 바꾸지 마세요
+  supabaseUrl: "https://dztjiykydhreczyrcffy.supabase.co",
+  supabaseKey: "sb_publishable_893er2-bWvBC8h1ZBf2OKQ_kV4kPrZw",
+
+  // 전광판 사진: photos 폴더에 jpg를 넣고 파일 이름을 적어 주세요
+  // 예: photos: ["photos/01.jpg", "photos/02.jpg"]
+  photos: [],
+
+  // 셋리스트: 곡 이름과 유튜브 주소를 적어 주세요
+  // url이 비어 있으면 "영상 준비 중"으로 보여요
+  setlist: [
+    { title: "곡 제목 1", url: "" },
+    { title: "곡 제목 2", url: "" },
+    { title: "곡 제목 3", url: "" },
+  ],
+};
+
+</script>
+  <script>
+(() => {
+  const S = window.SITE;
+  const API = S.supabaseUrl + "/rest/v1";
+  const HEADERS = { apikey: S.supabaseKey, "Content-Type": "application/json" };
+  const PAGE = 30;
+  const $ = (q, el = document) => el.querySelector(q);
+  const $$ = (q, el = document) => [...el.querySelectorAll(q)];
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  };
+
+  /* ---------- 기본 정보 ---------- */
+  const bday = new Date(S.birthday);
+  const pad = (n) => String(n).padStart(2, "0");
+  const bdayText = `${bday.getFullYear()}.${pad(bday.getMonth() + 1)}.${pad(bday.getDate())}`;
+  $$(".artist-name").forEach((el) => (el.textContent = S.artist));
+  $$(".birthday-text").forEach((el) => (el.textContent = bdayText));
+  $("#ticket-no").textContent = String(Math.floor(Math.random() * 9000) + 1000);
+  document.title = `HAPPY BIRTHDAY ${S.artist} — 생일 축하 공연`;
+
+  function updateDday() {
+    const now = new Date();
+    const dayMs = 86400000;
+    const toKstDay = (d) => Math.floor((d.getTime() + 9 * 3600000) / dayMs);
+    const diff = toKstDay(bday) - toKstDay(now);
+    const el = $("#dday"), sub = $("#dday-sub");
+    if (diff > 0) { el.textContent = `D-${diff}`; sub.textContent = `${bdayText} 생일까지`; }
+    else if (diff === 0) { el.textContent = "HAPPY DAY"; sub.textContent = "오늘이 바로 생일이에요"; }
+    else { el.textContent = `D+${-diff}`; sub.textContent = `${bdayText} 생일 이후`; }
+  }
+  updateDday();
+  setInterval(updateDday, 60000);
+
+  /* ---------- 입장 ---------- */
+  const gate = $("#ticket-gate");
+  let entered = false;
+  try { entered = sessionStorage.getItem("entered") === "1"; } catch {}
+  if (entered) gate.classList.add("hide"); else document.body.classList.add("locked");
+  $("#enter-btn").addEventListener("click", () => {
+    gate.classList.add("hide");
+    document.body.classList.remove("locked");
+    try { sessionStorage.setItem("entered", "1"); } catch {}
+  });
+
+  /* ---------- 조명 전환 ---------- */
+  function setTheme(t) {
+    document.body.classList.remove("theme-pink", "theme-blue");
+    document.body.classList.add("theme-" + t);
+    $$(".light-switch button").forEach((b) => {
+      const on = b.dataset.theme === t;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-pressed", on);
+    });
+    store.set("theme", t);
+  }
+  setTheme(store.get("theme") === "blue" ? "blue" : "pink");
+  $$(".light-switch button").forEach((b) => b.addEventListener("click", () => setTheme(b.dataset.theme)));
+
+  /* ---------- 객석 메리엘 불빛 ---------- */
+  const cv = $("#crowd"), ctx = cv.getContext("2d");
+  let dots = [], W = 0, H = 0, extra = 0;
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function makeDots() {
+    const base = Math.round((W * H) / 5200);
+    const n = Math.min(base + extra * 4, base * 2.2);
+    dots = Array.from({ length: n }, () => ({
+      x: Math.random() * W,
+      y: H * 0.18 + Math.pow(Math.random(), 0.7) * H * 0.82,
+      r: 0.6 + Math.random() * 1.6,
+      p: Math.random() * Math.PI * 2,
+      s: 0.6 + Math.random() * 1.8,
+    }));
+  }
+  function resize() {
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    W = innerWidth; H = innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    makeDots();
+  }
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+    const pink = document.body.classList.contains("theme-pink");
+    for (const d of dots) {
+      const a = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(d.p + (t / 1000) * d.s));
+      const hue = pink ? 290 : 262;
+      ctx.beginPath();
+      ctx.fillStyle = `hsla(${hue}, 90%, 80%, ${a * 0.85})`;
+      ctx.shadowColor = `hsla(${hue}, 100%, 70%, ${a})`;
+      ctx.shadowBlur = 6;
+      ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    if (!reduced) requestAnimationFrame(draw);
+  }
+  addEventListener("resize", resize);
+  resize();
+  requestAnimationFrame(draw);
+
+  /* ---------- 전광판 사진 ---------- */
+  if (S.photos && S.photos.length) {
+    const screen = $("#screen");
+    $(".screen-placeholder", screen).remove();
+    const imgs = S.photos.map((src, i) => {
+      const img = new Image();
+      img.src = src; img.alt = ""; img.loading = i === 0 ? "eager" : "lazy";
+      screen.appendChild(img);
+      return img;
+    });
+    let i = 0;
+    imgs[0].classList.add("on");
+    if (imgs.length > 1) setInterval(() => {
+      imgs[i].classList.remove("on");
+      i = (i + 1) % imgs.length;
+      imgs[i].classList.add("on");
+    }, 4500);
+  }
+
+  /* ---------- 셋리스트 ---------- */
+  function ytId(url) {
+    if (!url) return null;
+    const m = url.match(/(?:youtu\.be\/|v=|embed\/|shorts\/|live\/)([A-Za-z0-9_-]{11})/);
+    return m ? m[1] : null;
+  }
+  const list = $("#setlist"), player = $("#player");
+  S.setlist.forEach((song) => {
+    const li = document.createElement("li");
+    const id = ytId(song.url);
+    li.tabIndex = 0;
+    li.innerHTML = `<span class="song"></span><span class="tag"></span>`;
+    $(".song", li).textContent = song.title;
+    $(".tag", li).textContent = id ? "▶ 재생" : "영상 준비 중";
+    const play = () => {
+      if (!id) return;
+      $$(".setlist li").forEach((x) => x.classList.remove("playing"));
+      li.classList.add("playing");
+      player.hidden = false;
+      player.innerHTML = "";
+      const f = document.createElement("iframe");
+      f.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+      f.title = song.title;
+      f.allow = "autoplay; encrypted-media; picture-in-picture";
+      f.allowFullscreen = true;
+      player.appendChild(f);
+      player.scrollIntoView({ behavior: "smooth", block: "center" });
+    };
+    li.addEventListener("click", play);
+    li.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); play(); } });
+    list.appendChild(li);
+  });
+
+  /* ---------- 글 불러오기 ---------- */
+  const state = { ilchon: { offset: 0, el: $("#slogans") }, guestbook: { offset: 0, el: $("#letters") } };
+  const fmt = (iso) => {
+    const d = new Date(iso);
+    return `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  async function load(kind, reset) {
+    const st = state[kind];
+    if (reset) { st.offset = 0; st.el.innerHTML = ""; }
+    const url = `${API}/posts?select=id,nickname,message,created_at&kind=eq.${kind}&order=id.desc&limit=${PAGE}&offset=${st.offset}`;
+    try {
+      const res = await fetch(url, { headers: { ...HEADERS, Prefer: "count=exact" } });
+      if (!res.ok) throw new Error(res.status);
+      const rows = await res.json();
+      const total = Number((res.headers.get("content-range") || "").split("/")[1]) || 0;
+      if (reset && !rows.length) {
+        st.el.innerHTML = `<li class="empty">${kind === "ilchon" ? "첫 번째 슬로건을 올려 주세요!" : "첫 번째 편지를 남겨 주세요!"}</li>`;
+      }
+      rows.forEach((r) => st.el.appendChild(render(kind, r)));
+      st.offset += rows.length;
+      $(`[data-more="${kind}"]`).hidden = st.offset >= total;
+      if (kind === "ilchon") $(".lights-count").textContent = total ? `지금 ${total}개의 슬로건이 객석을 밝히고 있어요.` : "";
+      return total;
+    } catch (e) {
+      if (reset) st.el.innerHTML = `<li class="empty">글을 불러오지 못했어요. 잠시 후 새로고침해 주세요.</li>`;
+      return 0;
+    }
+  }
+
+  function render(kind, r) {
+    const li = document.createElement("li");
+    li.dataset.id = r.id;
+    if (kind === "ilchon") {
+      li.style.setProperty("--tilt", `${(Math.random() * 6 - 3).toFixed(1)}deg`);
+      li.innerHTML = `<span class="msg"></span><span class="who"><span class="name"></span><button class="del" type="button">삭제</button></span>`;
+      $(".msg", li).textContent = r.message;
+      $(".name", li).textContent = `— ${r.nickname}`;
+    } else {
+      li.innerHTML = `<div class="head"><span class="who"></span><span class="when"></span></div><p class="msg"></p><button class="del" type="button">삭제</button>`;
+      $(".who", li).textContent = r.nickname;
+      $(".when", li).textContent = fmt(r.created_at);
+      $(".msg", li).textContent = r.message;
+    }
+    $(".del", li).addEventListener("click", () => askDelete(kind, li, r.id));
+    return li;
+  }
+
+  /* ---------- 삭제 ---------- */
+  function askDelete(kind, li, id) {
+    if ($(".del-box", li)) return;
+    const box = document.createElement("form");
+    box.className = "del-box";
+    box.style.cssText = "display:flex;gap:6px;margin-top:8px";
+    box.innerHTML = `<input type="password" placeholder="비밀번호" style="flex:1;min-width:0;padding:6px 8px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#150b28;font-size:13px" required>
+      <button style="padding:6px 10px;border:0;border-radius:8px;background:#150b28;color:#fff;font-size:12px;cursor:pointer">삭제</button>
+      <button type="button" style="padding:6px 10px;border:0;border-radius:8px;background:#ddd;color:#150b28;font-size:12px;cursor:pointer">취소</button>`;
+    li.appendChild(box);
+    const input = $("input", box);
+    input.focus();
+    box.lastElementChild.addEventListener("click", () => box.remove());
+    box.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const ok = await rpc("delete_post", { p_id: id, p_password: input.value });
+      if (ok === true) { li.remove(); load(kind, true); refreshLights(); }
+      else { input.value = ""; input.placeholder = "비밀번호가 달라요"; }
+    });
+  }
+
+  async function rpc(fn, body) {
+    const res = await fetch(`${API}/rpc/${fn}`, { method: "POST", headers: HEADERS, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  }
+
+  /* ---------- 글쓰기 ---------- */
+  $$(".post-form").forEach((form) => {
+    const kind = form.dataset.kind;
+    const msg = $(".form-msg", form);
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const last = Number(store.get("lastPost") || 0);
+      if (Date.now() - last < 15000) { msg.textContent = "조금만 기다렸다가 다시 올려 주세요."; return; }
+      const fd = new FormData(form);
+      const nickname = String(fd.get("nickname")).trim();
+      const message = String(fd.get("message")).trim();
+      const password = String(fd.get("password"));
+      if (!nickname || !message) { msg.textContent = "닉네임과 내용을 적어 주세요."; return; }
+      if (password.length < 4) { msg.textContent = "비밀번호는 4자 이상이어야 해요."; return; }
+      const btn = $("button[type=submit]", form);
+      btn.disabled = true; msg.textContent = "올리는 중…";
+      try {
+        await rpc("add_post", { p_kind: kind, p_nickname: nickname, p_ilchon_name: null, p_message: message, p_password: password });
+        store.set("lastPost", String(Date.now()));
+        form.reset();
+        msg.textContent = kind === "ilchon" ? "슬로건이 객석에 올라갔어요! 불빛이 하나 늘었어요." : "편지가 도착했어요!";
+        await load(kind, true);
+        refreshLights();
+      } catch (err) {
+        msg.textContent = "올리지 못했어요. 잠시 후 다시 시도해 주세요.";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  });
+
+  $$(".more").forEach((b) => b.addEventListener("click", () => load(b.dataset.more)));
+
+  async function refreshLights() {
+    try {
+      const res = await fetch(`${API}/posts?select=id&limit=1`, { headers: { ...HEADERS, Prefer: "count=exact" } });
+      extra = Number((res.headers.get("content-range") || "").split("/")[1]) || 0;
+      makeDots();
+    } catch {}
+  }
+
+  load("ilchon", true);
+  load("guestbook", true);
+  refreshLights();
+})();
+
+</script>
+</body>
+</html>
