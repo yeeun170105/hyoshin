@@ -190,20 +190,28 @@ main { position: relative; z-index: 1; }
 }
 .stage-floor { position: relative; z-index: 2; margin-top: -10px; width: 100%; display: grid; place-items: center; }
 .main-circle {
-  width: clamp(200px, 44vw, 380px); aspect-ratio: 2.4 / 1; border-radius: 50%;
-  display: grid; place-content: center; text-align: center;
+  position: relative;
+  width: clamp(320px, 46vw, 480px); aspect-ratio: 2 / 1; border-radius: 50%;
+  display: grid; place-items: center; text-align: center;
   background: radial-gradient(ellipse, var(--floor), #05030b 80%);
   border: 2px solid rgba(255, 255, 255, .5);
   box-shadow: 0 0 40px var(--glow), inset 0 0 40px var(--glow);
   transition: background .8s var(--ease), box-shadow .8s var(--ease);
 }
+.dday-box[hidden] { display: none; }
+.main-circle .bgm-frame {
+  position: relative; width: clamp(200px, 26vw, 290px); aspect-ratio: 16 / 9;
+  border-radius: 10px; overflow: hidden;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .35), 0 0 30px var(--glow);
+}
+.main-circle .bgm-frame[hidden] { display: none; }
 .dday { margin: 0; font-weight: 900; font-size: clamp(24px, 6vw, 44px); letter-spacing: .04em; line-height: 1.1; }
 .dday-sub { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
 
 /* ---------- 런웨이 ---------- */
 .runway {
   position: relative; z-index: 1;
-  width: clamp(70px, 12vw, 120px); height: 300px; margin: -6px auto 0;
+  width: clamp(70px, 12vw, 120px); height: 220px; margin: -6px auto 0;
   background: linear-gradient(180deg, #120a22, #0a0614);
   border-left: 2px solid rgba(255, 255, 255, .35);
   border-right: 2px solid rgba(255, 255, 255, .35);
@@ -325,25 +333,25 @@ main { position: relative; z-index: 1; }
 .more[hidden] { display: none; }
 .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 10px 0; list-style: none; width: 100%; }
 
-/* 배경 음악 미니 플레이어 */
-.bgm {
-  position: absolute; left: 50%; top: 50%; z-index: 3;
-  transform: translate(-50%, -50%);
-  width: 240px; border-radius: 14px; overflow: hidden;
+/* 배경 음악 명판 */
+.plaque {
+  position: absolute; left: 50%; top: 18px; z-index: 3;
+  transform: translateX(-50%);
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 12px; border-radius: 999px; white-space: nowrap;
   background: rgba(12, 7, 24, .92); border: 1px solid rgba(255, 255, 255, .35);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, .5), 0 0 24px var(--glow);
+  box-shadow: 0 0 20px var(--glow);
+  font-size: 12px; letter-spacing: .06em;
 }
-.bgm[hidden] { display: none; }
-.bgm-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: 11px; letter-spacing: .08em; }
-.bgm-title { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
-.bgm-title b { color: var(--ink); }
-.bgm-close { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 13px; padding: 0 2px; }
+.plaque[hidden] { display: none; }
+.plaque-dday { color: var(--light); font-weight: 900; transition: color .8s; }
+.bgm-title { color: var(--ink); }
+.bgm-close { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 12px; padding: 0 2px; }
 .bgm-eq { display: flex; gap: 2px; align-items: flex-end; height: 12px; }
 .bgm-eq i { width: 3px; background: var(--light); animation: eq 1s ease-in-out infinite; }
 .bgm-eq i:nth-child(2) { animation-delay: -.3s; }
 .bgm-eq i:nth-child(3) { animation-delay: -.6s; }
 @keyframes eq { 0%, 100% { height: 3px; } 50% { height: 12px; } }
-.bgm-frame { position: relative; aspect-ratio: 16 / 9; }
 .bgm-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .footer { position: relative; z-index: 2; text-align: center; padding: 30px 20px 60px; font-size: 12px; color: var(--muted); }
 .footer p { margin: 2px 0; }
@@ -352,8 +360,7 @@ main { position: relative; z-index: 1; }
   .post-form .row { grid-template-columns: 1fr; }
   .ticket-stub { width: 96px; }
   .block { padding: 22px 16px; margin: 44px auto; }
-  .runway { height: 250px; }
-  .bgm { width: 200px; }
+  .runway { height: 170px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .beams i, .ticket { animation: none; }
@@ -418,9 +425,12 @@ main { position: relative; z-index: 1; }
         <polygon points="100,4 18,256 40,256 100,40 160,256 182,256" fill="url(#lattice)" stroke="currentColor" stroke-width="2" />
       </svg>
       <div class="stage-floor">
-        <div class="main-circle">
-          <p class="dday" id="dday">D-?</p>
-          <p class="dday-sub" id="dday-sub"></p>
+        <div class="main-circle" id="main-circle">
+          <div class="dday-box" id="dday-box">
+            <p class="dday" id="dday">D-?</p>
+            <p class="dday-sub" id="dday-sub"></p>
+          </div>
+          <div class="bgm-frame" id="bgm-frame" hidden></div>
         </div>
       </div>
     </section>
@@ -432,14 +442,12 @@ main { position: relative; z-index: 1; }
               fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity=".85" />
         <path d="M58 40 C 40 80, 66 120, 50 150" fill="none" stroke="#fff" stroke-width="3" opacity=".5" />
       </svg>
-    <aside class="bgm" id="bgm" hidden aria-label="배경 음악">
-      <div class="bgm-head">
-        <span class="bgm-eq" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span class="bgm-title">NOW PLAYING · <b id="bgm-title"></b></span>
-        <button type="button" class="bgm-close" id="bgm-close" aria-label="음악 끄기">✕</button>
-      </div>
-      <div class="bgm-frame" id="bgm-frame"></div>
-    </aside>
+    <div class="plaque" id="bgm" hidden>
+      <b class="plaque-dday" id="plaque-dday"></b>
+      <span class="bgm-eq" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="bgm-title"><b id="bgm-title"></b></span>
+      <button type="button" class="bgm-close" id="bgm-close" aria-label="음악 끄기">✕</button>
+    </div>
     </div>
 
     <!-- 셋리스트 -->
@@ -564,6 +572,8 @@ window.SITE = {
     if (diff > 0) { el.textContent = `D-${diff}`; sub.textContent = `${bdayText} 생일까지`; }
     else if (diff === 0) { el.textContent = "HAPPY DAY"; sub.textContent = "오늘이 바로 생일이에요"; }
     else { el.textContent = `D+${-diff}`; sub.textContent = `${bdayText} 생일 이후`; }
+    const pd = document.getElementById("plaque-dday");
+    if (pd) pd.textContent = el.textContent;
   }
   updateDday();
   setInterval(updateDday, 60000);
@@ -581,7 +591,7 @@ window.SITE = {
   });
 
   /* ---------- 입장 배경 음악 ---------- */
-  const bgmBox = $("#bgm"), bgmFrame = $("#bgm-frame");
+  const bgmBox = $("#bgm"), bgmFrame = $("#bgm-frame"), ddayBox = $("#dday-box");
   function startBgm() {
     const id = S.bgm && ytId(S.bgm.url);
     if (!id) return;
@@ -592,9 +602,17 @@ window.SITE = {
     f.title = S.bgm.title || "배경 음악";
     f.allow = "autoplay; encrypted-media; picture-in-picture";
     bgmFrame.appendChild(f);
+    bgmFrame.hidden = false;
+    ddayBox.hidden = true;
     bgmBox.hidden = false;
+    updateDday();
   }
-  function stopBgm() { bgmFrame.innerHTML = ""; bgmBox.hidden = true; }
+  function stopBgm() {
+    bgmFrame.innerHTML = "";
+    bgmFrame.hidden = true;
+    ddayBox.hidden = false;
+    bgmBox.hidden = true;
+  }
   $("#bgm-close").addEventListener("click", stopBgm);
   // 이미 입장한 상태로 새로고침했을 때는 플레이어만 보여 주고 누르면 재생
   if (entered && S.bgm && ytId(S.bgm.url)) startBgm();
