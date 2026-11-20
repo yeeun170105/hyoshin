@@ -137,6 +137,7 @@ body.theme-pink .meriel circle{fill:#f0b8ff}
 .np{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px auto 0;font-size:12px;letter-spacing:.08em}
 .np[hidden]{display:none}
 .np b{color:var(--light)}
+.np button[hidden]{display:none}
 .np button{border:1px solid var(--line);background:rgba(255,255,255,.06);border-radius:999px;padding:3px 10px;cursor:pointer;font-size:11px;color:var(--muted)}
 .eq{display:inline-flex;gap:2px;align-items:flex-end;height:12px}
 .eq i{width:3px;background:var(--light);animation:eq 1s ease-in-out infinite}
@@ -389,7 +390,7 @@ main{position:relative;z-index:2}
   </div>
 
   <div class="under" id="under">
-    <div class="np" id="np" hidden><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span>NOW PLAYING · <b id="np-title"></b></span><button type="button" id="np-stop">끄기</button></div>
+    <div class="np" id="np" hidden><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span>NOW PLAYING · <b id="np-title"></b></span><button type="button" id="np-toggle" aria-expanded="false" hidden>▼ 영상 보기</button><button type="button" id="np-stop">끄기</button></div>
     <div class="ticker" id="ticker" aria-label="축하 메시지"><span id="ticker-text">생일 축하 메시지가 여기에 흘러가요</span></div>
   </div>
 </section>
@@ -467,7 +468,21 @@ window.SITE = {
   photos: [],
   // 셋리스트: url이 비어 있으면 "영상 준비 중"
   setlist: [
-    { title: "HOME", url: "https://www.youtube.com/watch?v=iJYYqKi5J6c" },
+    { title: "Happy Together", url: "https://www.youtube.com/watch?v=yyb0QuHuIOU" },
+    { title: "Shine Your Light", url: "https://www.youtube.com/watch?v=BmFMxMYLbmk" },
+    { title: "연인", url: "https://www.youtube.com/watch?v=8xO_3PDG-as" },
+    { title: "AE", url: "https://www.youtube.com/watch?v=_9g-EV3u-o8" },
+    { title: "기도 (Prayer)", url: "https://www.youtube.com/watch?v=ry73PU-IEOQ" },
+    { title: "눈의 꽃", url: "https://www.youtube.com/watch?v=BIQGD3Ch6cQ" },
+    { title: "Winter Ahead (V with 박효신)", url: "https://www.youtube.com/watch?v=HAWYOuMGkK0" },
+    { title: "숨", url: "https://www.youtube.com/watch?v=V3yHzAPUGWg" },
+    { title: "HERO", url: "https://www.youtube.com/watch?v=yI0BNkRQWYE" },
+    { title: "Miracle", url: "https://www.youtube.com/watch?v=9Khm0A79oAI" },
+    { title: "The Castle of Zoltar", url: "https://www.youtube.com/watch?v=f606CWQWle8" },
+    { title: "Gift", url: "https://www.youtube.com/watch?v=haM03BYST8c" },
+    { title: "Any Love", url: "https://www.youtube.com/watch?v=JZCVN-t2RPA" },
+    { title: "야생화", url: "https://www.youtube.com/watch?v=ZtcM3KhgF-s" },
+    { title: "Stellar Night", url: "https://www.youtube.com/watch?v=BCsJI_ktecQ" },
   ],
 };
 </script>
@@ -525,16 +540,17 @@ window.SITE = {
   // 유튜브 플레이어는 가로 200px 이상이어야 해서, 무대가 작으면 영상을 무대 아래로 옮긴다
   const stage = $("#stage"), venue = $("#venue"), slot = $("#video-slot");
   let narrow = null;
+  let current = null; // 지금 고른 곡 {src, title, url}
   function layout() {
     const isNarrow = stage.clientWidth * 0.2 < 200;
     if (isNarrow === narrow) return;
     narrow = isNarrow;
     venue.classList.toggle("narrow", narrow);
-    const playing = !slot.hidden;
-    const src = playing ? $("iframe", slot)?.src : null;
     if (narrow) $("#under").prepend(slot); else $("#left").appendChild(slot);
-    if (src) { slot.innerHTML = ""; slot.appendChild(makeFrame(src, $("#np-title").textContent)); }
-    if (playing) $("#left-led").hidden = !narrow;
+    if (current) {
+      if (narrow) collapse(); else expand();
+      $("#left-led").hidden = !narrow;
+    }
   }
   new ResizeObserver(layout).observe(stage);
 
@@ -552,22 +568,38 @@ window.SITE = {
     f.allowFullscreen = true;
     return f;
   }
-  function play(url, title) {
+  function expand() {
+    if (!current) return;
+    slot.innerHTML = "";
+    slot.appendChild(makeFrame(current.src, current.title));
+    slot.hidden = false;
+    $("#np-toggle").textContent = "▲ 접기";
+    $("#np-toggle").setAttribute("aria-expanded", "true");
+  }
+  function collapse() {
+    // 휴대폰에서는 영상을 접어 둔다 (접으면 소리도 멈춤)
+    slot.innerHTML = "";
+    slot.hidden = true;
+    $("#np-toggle").textContent = "▼ 영상 보기";
+    $("#np-toggle").setAttribute("aria-expanded", "false");
+  }
+  function play(url, title, fromTap) {
     const id = ytId(url);
     if (!id) return false;
-    slot.innerHTML = "";
-    slot.appendChild(makeFrame(`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1`, title));
-    slot.hidden = false;
+    current = { url, title, src: `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1` };
     const led = $("#left-led");
     led.innerHTML = `<span class="big">NOW PLAYING</span><span class="song"></span>`;
     $(".song", led).textContent = title || "";
     led.hidden = !narrow;
     $("#np-title").textContent = title || "";
     $("#np").hidden = false;
+    $("#np-toggle").hidden = !narrow;
+    if (narrow && !fromTap) collapse(); else expand();
     $$(".setlist li").forEach((li) => li.classList.toggle("playing", li.dataset.url === url));
     return true;
   }
   function stop() {
+    current = null;
     slot.innerHTML = "";
     slot.hidden = true;
     const led = $("#left-led");
@@ -577,6 +609,7 @@ window.SITE = {
     $("#np").hidden = true;
     $$(".setlist li").forEach((li) => li.classList.remove("playing"));
   }
+  $("#np-toggle").addEventListener("click", () => { if (slot.hidden) expand(); else collapse(); });
   $("#np-stop").addEventListener("click", stop);
 
 
@@ -799,7 +832,7 @@ window.SITE = {
     li.innerHTML = `<span class="song"></span><span class="tag"></span>`;
     $(".song", li).textContent = song.title;
     $(".tag", li).textContent = ok ? "▶ 재생" : "영상 준비 중";
-    const go = () => { if (play(song.url, song.title)) venue.scrollIntoView({ behavior: "smooth" }); };
+    const go = () => { if (play(song.url, song.title, true)) venue.scrollIntoView({ behavior: "smooth" }); };
     li.addEventListener("click", go);
     li.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
     list.appendChild(li);
