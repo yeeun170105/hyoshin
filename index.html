@@ -167,6 +167,9 @@ main{position:relative;z-index:2}
 .eyebrow{margin:0;font-family:Montserrat,sans-serif;font-size:12px;letter-spacing:.3em;font-weight:800;color:var(--light)}
 .block h2{margin:2px 0 6px;font-size:clamp(22px,5vw,30px);font-weight:900}
 .desc{margin:0;color:var(--muted);font-size:14px}
+.setlist-title{margin:0 0 8px;font-family:Montserrat,sans-serif;font-weight:800;font-size:clamp(28px,7.5vw,42px);letter-spacing:.32em;padding-left:.32em;color:#fff;text-shadow:0 0 6px #fff,0 0 16px var(--light),0 0 34px var(--light);animation:neon 3.2s ease-in-out infinite}
+.setlist-title::before,.setlist-title::after{content:"✦";font-size:.42em;vertical-align:middle;color:var(--light);margin:0 .6em;letter-spacing:0;text-shadow:0 0 10px var(--light)}
+@keyframes neon{0%,100%{opacity:1}48%{opacity:1}50%{opacity:.75}52%{opacity:1}}
 .setlist{list-style:none;margin:0;padding:0;counter-reset:song}
 .setlist li{counter-increment:song;display:flex;align-items:center;gap:14px;padding:13px 14px;border-radius:12px;cursor:pointer;border:1px solid transparent;transition:background .2s,border-color .2s}
 .setlist li::before{content:counter(song,decimal-leading-zero);font-family:Montserrat,sans-serif;font-weight:800;color:var(--light);width:26px;font-size:14px}
@@ -398,8 +401,7 @@ main{position:relative;z-index:2}
 <main>
   <section class="block" id="setlist-sec">
     <div class="block-head">
-      <p class="eyebrow">SET LIST</p>
-      <h2>오늘의 셋리스트</h2>
+      <p class="setlist-title">SET LIST</p>
       <p class="desc">곡을 누르면 왼쪽 스크린에서 재생돼요.</p>
     </div>
     <ol class="setlist" id="setlist"></ol>
