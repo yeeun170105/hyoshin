@@ -205,8 +205,7 @@ main{position:relative;z-index:2}
 
 /* ---------- 스탠딩 구역 (관객 캐릭터) ---------- */
 .venue{display:flex;flex-direction:column}
-.stage{order:0}.floor{order:1}.under{order:2}
-.narrow .under{order:1}.narrow .floor{order:2}
+.stage{order:0}.floor{order:1}.ticker{order:2}.under{order:3}
 .floor{position:relative;width:min(1600px,100%);margin:-1px auto 0;height:clamp(230px,26vw,360px);overflow:hidden;
   background:radial-gradient(ellipse 60% 70% at 50% 0%,var(--haze),transparent 70%),linear-gradient(#06020a,#120a1c 55%,#0a0410);
   border-top:1px solid rgba(255,255,255,.08)}
@@ -292,6 +291,130 @@ main{position:relative;z-index:2}
 .px-gate.space .name-form input::placeholder{color:#8f87b8}
 .px-gate.space .enter-btn{background:#c5a3ff;border-color:#efe6ff;box-shadow:3px 3px 0 #efe6ff;color:#1a1440}
 .px-gate.space .gate-note{color:#9a8fc4}
+
+/* ================= 무대 아래: 초대장 세계관 (도트 · 밤하늘 · 숲) ================= */
+:root{--px-ink:#1c1a33;--px-paper:#fffaf0;--px-purple:#5b3fa0;--px-lav:#c5a3ff;--px-lav2:#ece5ff}
+.floor,.under,main,.footer{font-family:"Galmuri11","Galmuri9","Noto Sans KR",monospace}
+main{background:
+  radial-gradient(2px 2px at 8% 6%,#fff 50%,transparent 51%),radial-gradient(2px 2px at 22% 18%,#d9c8ff 50%,transparent 51%),
+  radial-gradient(2px 2px at 41% 9%,#fff 50%,transparent 51%),radial-gradient(2px 2px at 63% 15%,#fff 50%,transparent 51%),
+  radial-gradient(2px 2px at 78% 5%,#cfe0ff 50%,transparent 51%),radial-gradient(2px 2px at 92% 21%,#fff 50%,transparent 51%),
+  radial-gradient(2px 2px at 12% 38%,#fff 50%,transparent 51%),radial-gradient(2px 2px at 88% 44%,#e7d4ff 50%,transparent 51%),
+  radial-gradient(2px 2px at 34% 57%,#fff 50%,transparent 51%),radial-gradient(2px 2px at 70% 66%,#fff 50%,transparent 51%),
+  radial-gradient(2px 2px at 6% 78%,#d9c8ff 50%,transparent 51%),radial-gradient(2px 2px at 94% 86%,#fff 50%,transparent 51%),
+  linear-gradient(#0b0c26,#141236 40%,#1b1440 75%,#22163f);padding:8px 0 1px}
+.floor{background:linear-gradient(#0a0b22,#141236 70%,#1b1440);border-top:4px solid var(--px-ink)}
+.floor::before{background:var(--forest-back) repeat-x 0 100%/auto 46%;opacity:.9}
+.floor-label{font-family:"Galmuri11",monospace;color:#e9dcff;letter-spacing:.2em;text-shadow:2px 2px 0 var(--px-ink)}
+.floor-count{font-family:"Galmuri9","Galmuri11",monospace;color:#c9b8f0}
+.floor-count b{color:#ffd86b}
+.under .np{font-family:"Galmuri11",monospace;color:#efe6ff}
+.under .np b{color:#ffd86b}
+.under .np button{border:2px solid #efe6ff;border-radius:0;background:#141737;color:#efe6ff;font-family:"Galmuri11",monospace;box-shadow:2px 2px 0 #efe6ff}
+.ticker{border:3px solid var(--px-ink);border-radius:0;background:#141737;color:#efe6ff;box-shadow:3px 3px 0 var(--px-lav)}
+.ticker span{font-family:"Galmuri11",monospace}
+
+.block{background:var(--px-paper);color:#3b2f2a;border:4px solid var(--px-ink);border-radius:0;backdrop-filter:none;
+  box-shadow:6px 6px 0 rgba(0,0,0,.45),0 0 40px rgba(197,163,255,.18);position:relative;
+  clip-path:polygon(4px 0,calc(100% - 4px) 0,calc(100% - 4px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 4px) calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 4px),0 calc(100% - 4px),0 4px,4px 4px)}
+.block::before{content:"";position:absolute;inset:8px;border:2px dashed #cbb8f2;pointer-events:none}
+.block > *{position:relative}
+.block-head .eyebrow{font-family:"Galmuri9","Galmuri11",monospace;color:#9b6be0;letter-spacing:.24em;font-weight:700}
+.block h2{font-family:"Galmuri11",monospace;font-weight:700;color:var(--px-purple);text-shadow:3px 3px 0 #e3d8fb}
+.desc{color:#6a5a8a;font-family:"Galmuri9","Galmuri11",monospace}
+.setlist-title{font-family:"Galmuri11",monospace;font-weight:700;color:var(--px-purple);letter-spacing:.18em;padding-left:.18em;
+  text-shadow:3px 3px 0 #e3d8fb;animation:none;font-size:clamp(26px,7vw,38px)}
+.setlist-title::before,.setlist-title::after{color:#f2c94c;text-shadow:none;animation:blink 1.2s steps(2) infinite}
+.setlist li{border:2px dashed transparent;border-radius:0}
+.setlist li::before{color:#9b6be0;font-family:"Galmuri11",monospace}
+.setlist li:hover,.setlist li:focus-visible{background:#f4effe;border-color:#cbb8f2}
+.setlist li.playing{background:var(--px-lav2);border:2px solid var(--px-purple)}
+.setlist .song{color:#3b2f2a;font-weight:700}
+.setlist .tag{color:#8a7aa8}
+.me-line{color:#6a5a8a;font-family:"Galmuri9","Galmuri11",monospace}
+.me-line b{color:var(--px-purple)}
+.me-line button{color:#9b6be0}
+.post-form input,.post-form textarea{border:3px solid var(--px-ink);border-radius:0;background:#fff;color:#3b2f2a;font-family:"Galmuri11","Noto Sans KR",monospace;box-shadow:inset 2px 2px 0 #ece7f6}
+.post-form input::placeholder,.post-form textarea::placeholder{color:#a99fc0}
+.post-form input:focus,.post-form textarea:focus{border-color:var(--px-purple);background:#fdfbff}
+.post-form button{border:3px solid var(--px-ink);border-radius:0;background:var(--px-lav);color:#1a1440;font-family:"Galmuri11",monospace;box-shadow:4px 4px 0 var(--px-ink)}
+.post-form button:active{transform:translate(4px,4px);box-shadow:none}
+.post-form .me-line .rename{border:0;background:none;box-shadow:none;padding:0 0 0 6px;color:#9b6be0;font-size:12px;text-decoration:underline;font-family:"Galmuri9","Galmuri11",monospace}
+.form-msg{color:#6a5a8a;font-family:"Galmuri9","Galmuri11",monospace}
+.slogans li{background:#fff;border:3px solid var(--px-ink);border-radius:0;box-shadow:4px 4px 0 var(--px-lav)}
+.slogans .msg{font-family:"Galmuri11",monospace;color:#3b2f2a}
+.slogans .who{font-family:"Galmuri9",monospace;color:#8a7aa8}
+.letters li{background:#fff;border:3px solid var(--px-ink);border-radius:0;box-shadow:4px 4px 0 #e3d8fb}
+.letters .who{color:var(--px-purple);font-family:"Galmuri11",monospace}
+.letters .when{color:#a99fc0;font-family:"Galmuri9",monospace}
+.letters .msg{color:#3b2f2a}
+.del{color:#9b6be0}
+.more{border:3px solid var(--px-ink);border-radius:0;background:#fff;color:#3b2f2a;font-family:"Galmuri11",monospace;box-shadow:3px 3px 0 var(--px-ink)}
+.empty{color:#8a7aa8;font-family:"Galmuri9","Galmuri11",monospace}
+.footer{background:#22163f;color:#c9b8f0;padding-bottom:min(30vw,170px)!important;position:relative;overflow:hidden}
+.footer::after{content:"";position:absolute;left:0;right:0;bottom:0;height:min(30vw,160px);background:var(--forest-back) repeat-x 0 100%/auto 100%;image-rendering:pixelated;pointer-events:none}
+.footer p{position:relative;z-index:1}
+
+/* 휴대폰: 화면 맨 아래 미니 플레이어 */
+.ticker{width:min(560px,calc(100% - 28px));margin:10px auto 0}
+.narrow .under{position:fixed;left:0;right:0;bottom:0;z-index:40;width:100%;margin:0;padding:8px 12px calc(8px + env(safe-area-inset-bottom));
+  background:rgba(12,10,34,.96);border-top:3px solid #1c1a33;box-shadow:0 -4px 0 rgba(197,163,255,.35);display:flex;flex-direction:column;align-items:center}
+.narrow .under:not(:has(.np:not([hidden]))){display:none}
+.narrow .under .np{margin:0;flex-wrap:nowrap;font-size:12px;max-width:100%}
+.narrow .under .np span:not(.eq){white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.narrow .under .video-slot{order:-1;margin:0 auto 8px}
+body.has-player .footer{padding-bottom:calc(min(30vw,170px) + 64px)!important}
+
+/* 접었다 펴는 메뉴 + 작은 글씨 */
+.fold-head{display:block;width:100%;margin:0;padding:4px 0;border:0;background:none;cursor:pointer;text-align:center;font:inherit;color:inherit;position:relative}
+.fold-head > span{display:block}
+.fold-arrow{position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:12px;color:#9b6be0;transition:transform .2s steps(2)}
+.block.open .fold-arrow{transform:translateY(-50%) rotate(180deg)}
+.block:not(.open){padding-top:16px;padding-bottom:16px}
+.block:not(.open) .desc{display:none}
+.block-body[hidden]{display:none}
+.block-body{margin-top:14px}
+.block-head .h2{margin:2px 0 4px;font-family:"Galmuri11",monospace;font-weight:700;color:var(--px-purple);text-shadow:2px 2px 0 #e3d8fb;font-size:clamp(17px,4.6vw,21px)}
+.block-head .eyebrow{font-size:10px}
+.setlist-title{font-size:clamp(18px,5vw,24px)!important;margin-bottom:2px}
+.desc{font-size:12px}
+.block{margin:28px auto;padding:20px 18px}
+.setlist li{padding:9px 10px;gap:10px}
+.setlist li::before{font-size:11px;width:20px}
+.setlist .song{font-size:13px}
+.setlist .tag{font-size:11px}
+.me-line{font-size:12px}
+.post-form input,.post-form textarea{font-size:13px;padding:10px 12px}
+.post-form button{font-size:13px;padding:11px}
+.slogans .msg{font-size:13px}
+.slogans .who{font-size:10px}
+.letters li{padding:12px 14px}
+.letters .msg{font-size:13px;line-height:1.7}
+.letters .who{font-size:13px}
+.letters .when{font-size:10px}
+.more{font-size:12px;padding:8px 18px}
+.floor-label{font-size:10px}.floor-count{font-size:11px}
+.fan .name{font-size:9px}
+.bubble{font-size:11px}
+.footer{font-size:11px}
+.ticker span{font-size:12px}
+
+/* 미니홈피 메뉴판 */
+.mh-nav{width:min(760px,calc(100% - 28px));margin:18px auto 0;display:grid;grid-template-columns:repeat(5,1fr);
+  background:var(--px-paper);border:4px solid var(--px-ink);box-shadow:5px 5px 0 rgba(0,0,0,.45),0 0 30px rgba(197,163,255,.18)}
+.mh-nav button{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 2px 8px;border:0;border-right:2px dashed #cbb8f2;background:transparent;cursor:pointer;
+  font-family:"Galmuri9","Galmuri11",monospace;font-size:11px;color:#3b2f2a}
+.mh-nav button:last-child{border-right:0}
+.mh-nav button img{width:30px;height:auto;image-rendering:pixelated}
+.mh-nav button:hover{background:#f4effe}
+.mh-nav button.on{background:var(--px-purple);color:#fff}
+.mh-nav button.on img{filter:drop-shadow(0 0 0 #fff)}
+.mh-nav button:active img{transform:translateY(2px)}
+.t-ico{display:inline-block;width:1.05em;height:auto;vertical-align:-.12em;margin-right:.4em;image-rendering:pixelated}
+.setlist-title .t-ico{width:.85em}
+.floor-label .t-ico{width:16px;vertical-align:-3px}
+#setlist-sec,#slogan-sec,#letter-sec,#floor,#venue{scroll-margin-top:64px}
+body.has-player main{padding-bottom:90px}
 @media (max-width:560px){.post-form .row{grid-template-columns:1fr}.block{padding:22px 16px;margin:40px auto}.venue{margin-top:-40px}}
 @media (prefers-reduced-motion:reduce){.beam,.sparkle circle,.bulb-halo circle,.meriel circle{animation:none}}
 </style>
@@ -388,31 +511,42 @@ main{position:relative;z-index:2}
   </div>
 
   <div class="floor" id="floor" aria-label="스탠딩 구역: 응원을 남긴 팬들">
-    <span class="floor-label">STANDING</span>
+    <span class="floor-label"><img class="px t-ico" data-icon="people" alt="">STANDING</span>
     <span class="floor-count" id="floor-count"></span>
   </div>
 
+  <div class="ticker" id="ticker" aria-label="축하 메시지"><span id="ticker-text">축하 메시지가 여기에 흘러가요</span></div>
+
   <div class="under" id="under">
     <div class="np" id="np" hidden><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span>NOW PLAYING · <b id="np-title"></b></span><button type="button" id="np-toggle" aria-expanded="false" hidden>▼ 영상 보기</button><button type="button" id="np-stop">끄기</button></div>
-    <div class="ticker" id="ticker" aria-label="축하 메시지"><span id="ticker-text">생일 축하 메시지가 여기에 흘러가요</span></div>
   </div>
 </section>
 
 <main>
+  <nav class="mh-nav" aria-label="메뉴">
+    <button type="button" data-go="venue"><img class="px" data-icon="home" alt=""><span>무대</span></button>
+    <button type="button" data-go="floor"><img class="px" data-icon="people" alt=""><span>스탠딩</span></button>
+    <button type="button" data-go="setlist-sec"><img class="px" data-icon="music" alt=""><span>셋리스트</span></button>
+    <button type="button" data-go="slogan-sec"><img class="px" data-icon="chat" alt=""><span>응원</span></button>
+    <button type="button" data-go="letter-sec"><img class="px" data-icon="letter" alt=""><span>편지</span></button>
+  </nav>
   <section class="block" id="setlist-sec">
-    <div class="block-head">
-      <p class="setlist-title">SET LIST</p>
-      <p class="desc">곡을 누르면 왼쪽 스크린에서 재생돼요.</p>
-    </div>
+    <button type="button" class="block-head fold-head" aria-expanded="false" aria-controls="setlist-sec-body">
+      <span class="setlist-title"><img class="px t-ico" data-icon="music" alt="">SET LIST</span>
+      <span class="desc">곡을 누르면 재생돼요.</span>
+    <span class="fold-arrow" aria-hidden="true">▼</span></button>
+      <div class="block-body" id="setlist-sec-body" hidden>
     <ol class="setlist" id="setlist"></ol>
-  </section>
+        </div>
+    </section>
 
   <section class="block" id="slogan-sec">
-    <div class="block-head">
-      <p class="eyebrow">MESSAGE</p>
-      <h2>응원 메시지</h2>
-      <p class="desc">남긴 한 줄 응원은 무대 오른쪽 스크린에 떠올라요.</p>
-    </div>
+    <button type="button" class="block-head fold-head" aria-expanded="false" aria-controls="slogan-sec-body">
+      <span class="eyebrow">MESSAGE</span>
+      <span class="h2"><img class="px t-ico" data-icon="chat" alt="">응원 메시지</span>
+      <span class="desc">남긴 한 줄 응원은 무대 오른쪽 스크린에 떠올라요.</span>
+    <span class="fold-arrow" aria-hidden="true">▼</span></button>
+      <div class="block-body" id="slogan-sec-body" hidden>
     <form class="post-form" data-kind="ilchon" autocomplete="off">
       <p class="me-line"><b class="me-name"></b> 이름으로 남겨요<button type="button" class="rename">이름 바꾸기</button></p>
       <input type="hidden" name="nickname" />
@@ -425,14 +559,16 @@ main{position:relative;z-index:2}
     </form>
     <ul class="slogans" id="slogans"></ul>
     <button class="more" data-more="ilchon" hidden>더 보기</button>
-  </section>
+        </div>
+    </section>
 
   <section class="block" id="letter-sec">
-    <div class="block-head">
-      <p class="eyebrow">FAN LETTER</p>
-      <h2>팬레터함</h2>
-      <p class="desc">생일 축하 편지를 남겨 주세요. 모두가 함께 읽을 수 있어요.</p>
-    </div>
+    <button type="button" class="block-head fold-head" aria-expanded="false" aria-controls="letter-sec-body">
+      <span class="eyebrow">FAN LETTER</span>
+      <span class="h2"><img class="px t-ico" data-icon="letter" alt="">팬레터함</span>
+      <span class="desc">생일 축하 편지를 남겨 주세요. 모두가 함께 읽을 수 있어요.</span>
+    <span class="fold-arrow" aria-hidden="true">▼</span></button>
+      <div class="block-body" id="letter-sec-body" hidden>
     <form class="post-form" data-kind="guestbook" autocomplete="off">
       <p class="me-line"><b class="me-name"></b> 이름으로 남겨요<button type="button" class="rename">이름 바꾸기</button></p>
       <input type="hidden" name="nickname" />
@@ -445,11 +581,12 @@ main{position:relative;z-index:2}
     </form>
     <ul class="letters" id="letters"></ul>
     <button class="more" data-more="guestbook" hidden>더 보기</button>
-  </section>
+        </div>
+    </section>
 </main>
 
 <footer class="footer">
-  <p>팬이 만든 생일 축하 공간입니다. 아티스트·소속사의 공식 서비스가 아닙니다.</p>
+  <p>팬이 만든 공간입니다. 아티스트·소속사의 공식 서비스가 아닙니다.</p>
   <p>글에 개인정보를 적지 말아 주세요. 남긴 글은 모두에게 공개돼요.</p>
 </footer>
 
@@ -595,8 +732,9 @@ window.SITE = {
     led.hidden = !narrow;
     $("#np-title").textContent = title || "";
     $("#np").hidden = false;
+    document.body.classList.add("has-player");
     $("#np-toggle").hidden = !narrow;
-    if (narrow && !fromTap) collapse(); else expand();
+    if (narrow && slot.hidden) collapse(); else expand(); // 휴대폰: 접혀 있으면 접힌 채로, 펼쳐 있으면 새 곡으로
     $$(".setlist li").forEach((li) => li.classList.toggle("playing", li.dataset.url === url));
     return true;
   }
@@ -609,6 +747,7 @@ window.SITE = {
     led.innerHTML = `<span class="big">WELCOME HOME</span><span id="dday-led"></span>`;
     updateDday();
     $("#np").hidden = true;
+    document.body.classList.remove("has-player");
     $$(".setlist li").forEach((li) => li.classList.remove("playing"));
   }
   $("#np-toggle").addEventListener("click", () => { if (slot.hidden) expand(); else collapse(); });
@@ -617,10 +756,11 @@ window.SITE = {
 
   /* ---------- 도트 초대장 그림 ---------- */
   const PXC = { o: "#3b2f2a", c: "#fff8ec", s: "#f1e2c8", d: "#d9bd8f", f: "#fbefd9", r: "#e0457f", y: "#ffd86b", w: "#fff6e8", p: "#e8866b", n: "#8a5a44", h: "#ffffff", g: "#7cc07a", G: "#4f9a5c", D: "#2f6b45", t: "#8a5a3a", l: "#6fbf6a", L: "#3f8f4f", v: "#6fbf6a", V: "#3f8f4f" };
-  function pxImg(w, h, fn) {
+  function pxImg(w, h, fn, pal) {
+    const P = pal || PXC;
     const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
     const cx = cv.getContext("2d");
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const k = fn(x, y); if (k && PXC[k]) { cx.fillStyle = PXC[k]; cx.fillRect(x, y, 1, 1); } }
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const k = fn(x, y); if (k && P[k]) { cx.fillStyle = P[k]; cx.fillRect(x, y, 1, 1); } }
     return cv.toDataURL();
   }
   const HEART = ["...VV..", "..VvvV.", ".VvvvV.", "VvvhvV.", ".VvvV..", "..tV..."];
@@ -753,9 +893,10 @@ window.SITE = {
       return d1 > 30 ? "y" : "h";
     });
   }
-  if (gateEl) {
-    gateEl.style.setProperty("--forest-back", `url(${PX.forestBack()})`);
-    gateEl.style.setProperty("--forest-front", `url(${PX.forestFront()})`);
+  {
+    const root = document.documentElement;
+    root.style.setProperty("--forest-back", `url(${PX.forestBack()})`);
+    root.style.setProperty("--forest-front", `url(${PX.forestFront()})`);
   }
   const DAY = { o: "#3b2f2a", w: "#fff6e8", p: "#e8866b", n: "#8a5a44", g: "#7cc07a", G: "#4f9a5c", D: "#2f6b45", t: "#8a5a3a", l: "#6fbf6a", L: "#3f8f4f" };
   $$("[data-px]").forEach((img) => {
@@ -775,6 +916,82 @@ window.SITE = {
     m.className = "px px-moon"; m.alt = ""; m.src = PX.moon();
     gateEl.prepend(m);
   }
+
+
+  /* ---------- 도트 아이콘 ---------- */
+  const ICON_C = { o: "#1c1a33", p: "#c5a3ff", P: "#9b6be0", y: "#ffd86b", w: "#ffffff", r: "#ff8fb8", n: "#8a5a44", c: "#fff4d6", s: "#f6c2a0", h: "#5a3a2a", g: "#7cc07a" };
+  const ICONS = {
+    home: [
+      ".....oo.....",
+      "....orro..o.",
+      "...orrrro.o.",
+      "..orrrrrroo.",
+      ".orrrrrrrro.",
+      "oooooooooooo",
+      ".occcccccco.",
+      ".ocyocconco.",
+      ".ocooccnnco.",
+      ".occcccnnco.",
+      ".oooooooooo.",
+    ],
+    people: [
+      "..oo....oo..",
+      ".ohho..ohho.",
+      ".osso..osso.",
+      ".osso..osso.",
+      "..oo....oo..",
+      ".oppo..orro.",
+      "oppppooorrro",
+      "oppppo.orrro",
+      "oppppo.orrro",
+      ".oooo...ooo.",
+      "............",
+    ],
+    music: [
+      "....oooooooo",
+      "....oPPPPPPo",
+      "....oooooooo",
+      "....o......o",
+      "....o......o",
+      "....o......o",
+      "..ooo....ooo",
+      ".oPPPo..oPPo",
+      ".oPPPo.oPPPo",
+      "..ooo...ooo.",
+      "............",
+    ],
+    chat: [
+      ".oooooooooo.",
+      "owwwwwwwwwwo",
+      "owwwwwwwwwwo",
+      "owooowoowwwo",
+      "owwwwwwwwwwo",
+      "owwwwwwwwwwo",
+      ".oooooooooo.",
+      "..oo........",
+      "..o.........",
+      "............",
+      "............",
+    ],
+    letter: [
+      "oooooooooooo",
+      "oowwwwwwwwoo",
+      "owowwwwwwowo",
+      "owwowwwwowwo",
+      "owwwoyyowwwo",
+      "owwwwyywwwwo",
+      "owwwwwwwwwwo",
+      "owwwwwwwwwwo",
+      "oooooooooooo",
+      "............",
+      "............",
+    ],
+  };
+  function iconImg(name) {
+    const g = ICONS[name];
+    return pxImg(12, 11, (x, y) => { const k = g[y][x]; return k === "." ? null : k; }, ICON_C);
+  }
+  $$("[data-icon]").forEach((el) => { el.src = iconImg(el.dataset.icon); });
 
   /* ---------- 초대장 열기 ---------- */
   const invite = $("#invite");
@@ -824,6 +1041,30 @@ window.SITE = {
   }));
   if (entered && guestName && S.bgm) play(S.bgm.url, S.bgm.title);
 
+  /* ---------- 접었다 펴는 메뉴 ---------- */
+  $$(".fold-head").forEach((h) => {
+    const block = h.closest(".block"), body = $(".block-body", block);
+    h.addEventListener("click", () => {
+      const open = body.hidden;
+      body.hidden = !open;
+      block.classList.toggle("open", open);
+      h.setAttribute("aria-expanded", String(open));
+    });
+  });
+  function openBlock(id) {
+    const block = document.getElementById(id); if (!block) return;
+    const body = $(".block-body", block), h = $(".fold-head", block);
+    if (!body) return;
+    body.hidden = false; block.classList.add("open"); h.setAttribute("aria-expanded", "true");
+  }
+  $$(".mh-nav button").forEach((b) => b.addEventListener("click", () => {
+    $$(".mh-nav button").forEach((x) => x.classList.toggle("on", x === b));
+    const id = b.dataset.go;
+    if (id !== "venue" && id !== "floor") openBlock(id);
+    const target = document.getElementById(id);
+    if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }));
+
   /* ---------- 셋리스트 ---------- */
   const list = $("#setlist");
   S.setlist.forEach((song) => {
@@ -834,7 +1075,7 @@ window.SITE = {
     li.innerHTML = `<span class="song"></span><span class="tag"></span>`;
     $(".song", li).textContent = song.title;
     $(".tag", li).textContent = ok ? "▶ 재생" : "영상 준비 중";
-    const go = () => { if (play(song.url, song.title, true)) venue.scrollIntoView({ behavior: "smooth" }); };
+    const go = () => { if (play(song.url, song.title, false) && !narrow) venue.scrollIntoView({ behavior: "smooth" }); };
     li.addEventListener("click", go);
     li.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
     list.appendChild(li);
