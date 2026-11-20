@@ -526,19 +526,10 @@ body.has-player main{padding-bottom:90px}
   <nav class="mh-nav" aria-label="메뉴">
     <button type="button" data-go="venue"><img class="px" data-icon="home" alt=""><span>무대</span></button>
     <button type="button" data-go="floor"><img class="px" data-icon="people" alt=""><span>스탠딩</span></button>
-    <button type="button" data-go="setlist-sec"><img class="px" data-icon="music" alt=""><span>셋리스트</span></button>
     <button type="button" data-go="slogan-sec"><img class="px" data-icon="chat" alt=""><span>응원</span></button>
     <button type="button" data-go="letter-sec"><img class="px" data-icon="letter" alt=""><span>편지</span></button>
+    <button type="button" data-go="setlist-sec"><img class="px" data-icon="music" alt=""><span>셋리스트</span></button>
   </nav>
-  <section class="block" id="setlist-sec">
-    <button type="button" class="block-head fold-head" aria-expanded="false" aria-controls="setlist-sec-body">
-      <span class="setlist-title"><img class="px t-ico" data-icon="music" alt="">SET LIST</span>
-      <span class="desc">곡을 누르면 재생돼요.</span>
-    <span class="fold-arrow" aria-hidden="true">▼</span></button>
-      <div class="block-body" id="setlist-sec-body" hidden>
-    <ol class="setlist" id="setlist"></ol>
-        </div>
-    </section>
 
   <section class="block" id="slogan-sec">
     <button type="button" class="block-head fold-head" aria-expanded="false" aria-controls="slogan-sec-body">
@@ -581,6 +572,16 @@ body.has-player main{padding-bottom:90px}
     </form>
     <ul class="letters" id="letters"></ul>
     <button class="more" data-more="guestbook" hidden>더 보기</button>
+        </div>
+    </section>
+
+  <section class="block" id="setlist-sec">
+    <button type="button" class="block-head fold-head" aria-expanded="false" aria-controls="setlist-sec-body">
+      <span class="setlist-title"><img class="px t-ico" data-icon="music" alt="">SET LIST</span>
+      <span class="desc">곡을 누르면 재생돼요.</span>
+    <span class="fold-arrow" aria-hidden="true">▼</span></button>
+      <div class="block-body" id="setlist-sec-body" hidden>
+    <ol class="setlist" id="setlist"></ol>
         </div>
     </section>
 </main>
