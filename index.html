@@ -502,7 +502,7 @@ body.has-player main{padding-bottom:90px}
       <img class="px px-house" data-px="scene" alt="">
       <h2 class="px-title">WELCOME HOME</h2>
       <p class="px-caps">HYOSHIN &amp; SOULTREE</p>
-      <p class="px-date">♣ 12.01 ♣</p>
+      <p class="px-date">♣ OUR HOME ♣</p>
       <p class="px-love">Love is here.</p>
     </div></div>
     <img class="px env-front" data-px="envFront" alt="">
@@ -1075,7 +1075,7 @@ window.SITE = {
     setTimeout(() => { if (!gate.classList.contains("hide")) nameInput.focus({ preventScroll: true }); }, 1700);
   }
   invite.addEventListener("click", (e) => { if (!e.target.closest(".name-form")) openInvite(); });
-  setTimeout(openInvite, 1300);
+  // 봉투는 눌러야만 열린다
 
   /* ---------- 입장 (이름 적기) ---------- */
   const gate = $("#ticket-gate"), nameInput = $("#guest-name"), nameForm = $("#name-form");
