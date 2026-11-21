@@ -360,16 +360,29 @@ main{background:
 
 
 /* 양쪽 스크린 사진 */
-.side-pic{position:absolute;z-index:3;top:39%;width:31%;height:44%;display:grid;place-items:center;text-align:center;overflow:hidden;
-  -webkit-mask-image:radial-gradient(50% 50% at 50% 50%,#000 38%,rgba(0,0,0,.6) 58%,transparent 76%);mask-image:radial-gradient(50% 50% at 50% 50%,#000 38%,rgba(0,0,0,.6) 58%,transparent 76%)}
-.side-pic.l{left:6%}.side-pic.r{left:63%}
+.side-pic{position:absolute;z-index:3;top:40%;width:46.5%;height:42%;display:grid;place-items:center;text-align:center;overflow:hidden}
+/* 타원 스크린 반쪽 모양으로 가장자리를 흐리고, 가운데(트러스) 쪽으로 갈수록 은은하게 */
+.side-pic.l{left:2.5%;
+  -webkit-mask-image:radial-gradient(100% 50% at 100% 50%,#000 72%,transparent 99%),linear-gradient(to left,rgba(0,0,0,.25),#000 26%);
+  mask-image:radial-gradient(100% 50% at 100% 50%,#000 72%,transparent 99%),linear-gradient(to left,rgba(0,0,0,.25),#000 26%);
+  -webkit-mask-composite:source-in;mask-composite:intersect}
+.side-pic.r{left:51%;
+  -webkit-mask-image:radial-gradient(100% 50% at 0% 50%,#000 72%,transparent 99%),linear-gradient(to right,rgba(0,0,0,.25),#000 26%);
+  mask-image:radial-gradient(100% 50% at 0% 50%,#000 72%,transparent 99%),linear-gradient(to right,rgba(0,0,0,.25),#000 26%);
+  -webkit-mask-composite:source-in;mask-composite:intersect}
 .side-pic.has-pics{cursor:zoom-in}
-.side-pic img,.side-pic video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 22%;opacity:0;transition:opacity 1.6s var(--ease);
-  mix-blend-mode:screen;filter:saturate(.85) contrast(1.08) brightness(1.05)}
-.side-pic img.on,.side-pic video.on{opacity:.92}
+.side-pic .slide{position:absolute;inset:0;opacity:0;transition:opacity 1.6s var(--ease)}
+.side-pic .slide.on{opacity:1}
+/* 뒤: 같은 사진을 흐리게 깔아서 스크린을 꽉 채움 / 앞: 사진 전체(로고 포함)가 잘리지 않게 */
+.side-pic .slide .bg{position:absolute;inset:-12%;width:124%;height:124%;object-fit:cover;filter:blur(26px) saturate(1.3) brightness(.55);mix-blend-mode:screen;opacity:.8}
+.side-pic .slide .fg{position:absolute;top:3%;height:94%;width:auto;max-width:92%;left:50%;object-fit:contain;mix-blend-mode:screen;filter:contrast(1.05) brightness(1.06);
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 9%,#000 91%,transparent),linear-gradient(to bottom,transparent,#000 7%,#000 93%,transparent);
+  mask-image:linear-gradient(to right,transparent,#000 9%,#000 91%,transparent),linear-gradient(to bottom,transparent,#000 7%,#000 93%,transparent);
+  -webkit-mask-composite:source-in;mask-composite:intersect}
+.side-pic.l .slide .fg{transform:translateX(-56%)}.side-pic.r .slide .fg{transform:translateX(-44%)}
 .side-pic.has-pics::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px),radial-gradient(60% 60% at 50% 50%,transparent 40%,var(--glow) 100%);mix-blend-mode:multiply;opacity:.7}
-.side-pic .photo-tap{bottom:22%;z-index:2;opacity:0;animation:none;transition:opacity .3s}
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px);mix-blend-mode:multiply;opacity:.7}
+.side-pic .photo-tap{bottom:8%;z-index:2;opacity:0;animation:none;transition:opacity .3s}
 .side-pic:hover .photo-tap{opacity:1}
 .side-led{font-size:1.3cqw;line-height:1.5}
 .side-led .big{display:block;font-size:1.7cqw}
@@ -1149,11 +1162,17 @@ window.SITE = {
     const N = S.photos.length;
     const isVid = (src) => /\.(mp4|webm|mov)$/i.test(src);
     const makeEl = (src) => {
-      let el;
-      if (isVid(src)) { el = document.createElement("video"); el.muted = true; el.loop = true; el.autoplay = true; el.playsInline = true; el.setAttribute("playsinline", ""); }
-      else { el = new Image(); el.alt = ""; el.decoding = "async"; }
-      el.src = src;
-      return el;
+      const slide = document.createElement("div");
+      slide.className = "slide";
+      let fg;
+      if (isVid(src)) { fg = document.createElement("video"); fg.muted = true; fg.loop = true; fg.autoplay = true; fg.playsInline = true; fg.setAttribute("playsinline", ""); }
+      else {
+        const bg = new Image(); bg.alt = ""; bg.className = "bg"; bg.src = src; slide.appendChild(bg);
+        fg = new Image(); fg.alt = ""; fg.decoding = "async";
+      }
+      fg.className = "fg"; fg.src = src; slide.appendChild(fg);
+      slide.fg = fg;
+      return slide;
     };
     // 한 바퀴 다 돌 때까지 겹치지 않게 섞은 순서로 뽑는다
     let bag = [];
@@ -1192,8 +1211,9 @@ window.SITE = {
       side.i = k; side.el = el;
       side.box.insertBefore(el, side.box.firstChild);
       const on = () => { requestAnimationFrame(() => el.classList.add("on")); if (old) { old.classList.remove("on"); setTimeout(() => old.remove(), 1700); } };
-      if (el.tagName === "VIDEO") el.addEventListener("loadeddata", on, { once: true });
-      else if (el.complete) on(); else { el.onload = on; el.onerror = on; }
+      const fg = el.fg;
+      if (fg.tagName === "VIDEO") fg.addEventListener("loadeddata", on, { once: true });
+      else if (fg.complete) on(); else { fg.onload = on; fg.onerror = on; }
     };
     show(sides[0], draw([]));
     show(sides[1], draw([sides[0].i]));
