@@ -673,8 +673,8 @@ window.SITE = {
   photos: Array.from({ length: 32 }, (_, i) => `photos/${String(i + 1).padStart(2, "0")}.jpg`), // photos/01.jpg ~ 32.jpg
   // 무대 가운데 문구 (번갈아 떠요). 생일 당일(12/1)에는 birthday 문구가 떠요
   stageText: {
-    normal: ["사랑이 여기에 있어", "우리집에서 기다릴게", "언제나 넌 나의 최고였지"],
-    birthday: ["HAPPY BIRTHDAY", "생일 축하해요, 효신", "WELCOME HOME"],
+    normal: ["Love is here", "We'll be waiting at home", "You've always been my best"],
+    birthday: ["HAPPY BIRTHDAY", "HAPPY BIRTHDAY, HYOSHIN", "WELCOME HOME"],
   },
   // 셋리스트: url이 비어 있으면 "영상 준비 중"
   setlist: [
@@ -1210,7 +1210,7 @@ window.SITE = {
   }
 
   /* ---------- 트러스 가운데: 응원 메시지 ---------- */
-  const fallback = ["WELCOME HOME", "LET'S GO HOME", "생일 축하해요", "언제나 응원해요"];
+  const fallback = ["WELCOME HOME", "Love is here"];
   let pool = [];
   const trussBox = $("#photo"), trussMsg = $("#truss-msg");
   let trussIdx = 0;
