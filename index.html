@@ -670,7 +670,7 @@ window.SITE = {
   bgm: { title: "HOME", url: "https://www.youtube.com/watch?v=iJYYqKi5J6c" },
   // 가운데 트러스 안 사진: 예) ["photos/01.jpg", "photos/02.jpg"]
   // 양쪽 스크린: 사진(.jpg/.png)이나 짧은 영상(.mp4, 소리 없이 반복)
-  photos: ["photos/01.jpg"],
+  photos: Array.from({ length: 32 }, (_, i) => `photos/${String(i + 1).padStart(2, "0")}.jpg`), // photos/01.jpg ~ 32.jpg
   // 무대 가운데 문구 (번갈아 떠요). 생일 당일(12/1)에는 birthday 문구가 떠요
   stageText: {
     normal: ["사랑이 여기에 있어", "우리집에서 기다릴게", "언제나 넌 나의 최고였지"],
@@ -1143,45 +1143,68 @@ window.SITE = {
     list.appendChild(li);
   });
 
-  /* ---------- 양쪽 스크린 사진 ---------- */
+  /* ---------- 양쪽 스크린 사진: 랜덤, 양쪽은 항상 다른 사진 ---------- */
   if (S.photos && S.photos.length) {
     const lb = $("#lightbox");
-    const sides = [$("#pic-l"), $("#pic-r")].map((box, k) => {
+    const N = S.photos.length;
+    const isVid = (src) => /\.(mp4|webm|mov)$/i.test(src);
+    const makeEl = (src) => {
+      let el;
+      if (isVid(src)) { el = document.createElement("video"); el.muted = true; el.loop = true; el.autoplay = true; el.playsInline = true; el.setAttribute("playsinline", ""); }
+      else { el = new Image(); el.alt = ""; el.decoding = "async"; }
+      el.src = src;
+      return el;
+    };
+    // 한 바퀴 다 돌 때까지 겹치지 않게 섞은 순서로 뽑는다
+    let bag = [];
+    const draw = (avoid) => {
+      for (let t = 0; t < 3; t++) {
+        if (!bag.length) bag = [...Array(N).keys()].sort(() => Math.random() - 0.5);
+        const k = bag.pop();
+        if (N < 3 || !avoid.includes(k)) return k;
+      }
+      let k; do { k = Math.floor(Math.random() * N); } while (N > 2 && avoid.includes(k));
+      return k;
+    };
+    const sides = [$("#pic-l"), $("#pic-r")].map((box) => {
       box.innerHTML = "";
       box.classList.add("has-pics");
-      const imgs = S.photos.map((src) => {
-        let el;
-        if (/\.(mp4|webm|mov)$/i.test(src)) { el = document.createElement("video"); el.muted = true; el.loop = true; el.autoplay = true; el.playsInline = true; el.setAttribute("playsinline", ""); el.preload = "metadata"; }
-        else { el = new Image(); el.alt = ""; }
-        el.src = src; box.appendChild(el); return el;
-      });
       const tap = document.createElement("span");
       tap.className = "photo-tap"; tap.textContent = "▶ 크게 보기";
       box.appendChild(tap);
-      // 오른쪽은 한 장 뒤에서 시작해서 양쪽이 다른 사진을 보여 준다
-      const side = { imgs, i: S.photos.length > 1 ? k % S.photos.length : 0 };
-      imgs[side.i].classList.add("on");
+      const side = { box, i: -1, el: null };
       box.addEventListener("click", () => {
-        const cur = imgs[side.i], holder = $("div", lb);
+        if (side.i < 0) return;
+        const src = S.photos[side.i], holder = $("div", lb);
         $$("img,video", holder).forEach((x) => x.remove());
         let big;
-        if (cur.tagName === "VIDEO") { big = document.createElement("video"); big.src = cur.src; big.controls = true; big.autoplay = true; big.loop = true; big.playsInline = true; }
-        else { big = new Image(); big.src = cur.src; big.alt = ""; }
+        if (isVid(src)) { big = document.createElement("video"); big.src = src; big.controls = true; big.autoplay = true; big.loop = true; big.playsInline = true; }
+        else { big = new Image(); big.src = src; big.alt = ""; }
         holder.prepend(big);
         lb.hidden = false;
         requestAnimationFrame(() => lb.classList.add("show"));
       });
       return side;
     });
+    const show = (side, k) => {
+      const old = side.el;
+      const el = makeEl(S.photos[k]);
+      side.i = k; side.el = el;
+      side.box.insertBefore(el, side.box.firstChild);
+      const on = () => { requestAnimationFrame(() => el.classList.add("on")); if (old) { old.classList.remove("on"); setTimeout(() => old.remove(), 1700); } };
+      if (el.tagName === "VIDEO") el.addEventListener("loadeddata", on, { once: true });
+      else if (el.complete) on(); else { el.onload = on; el.onerror = on; }
+    };
+    show(sides[0], draw([]));
+    show(sides[1], draw([sides[0].i]));
     lb.addEventListener("click", (e) => { if (e.target.tagName === "VIDEO") return; lb.classList.remove("show"); setTimeout(() => { lb.hidden = true; $$("video", lb).forEach((v) => v.pause()); }, 300); });
-    if (S.photos.length > 1) {
+    if (N > 1) {
       let turn = 0;
       setInterval(() => {
-        const sd = sides[turn]; turn = 1 - turn;
-        sd.imgs[sd.i].classList.remove("on");
-        sd.i = (sd.i + 2) % sd.imgs.length;
-        if (sd.i === sides[turn].i) sd.i = (sd.i + 1) % sd.imgs.length;
-        sd.imgs[sd.i].classList.add("on");
+        if (document.hidden) return;
+        const sd = sides[turn], other = sides[1 - turn];
+        turn = 1 - turn;
+        show(sd, draw([sd.i, other.i]));
       }, 3500);
     }
   }
