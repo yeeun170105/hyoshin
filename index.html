@@ -565,6 +565,11 @@ body.rot-view .under{display:none}
 /* 응원·편지·셋리스트는 탭처럼 하나만 보임 */
 main .block.tab-off{display:none}
 
+/* 목록은 상자 안에서 스크롤 */
+#slogans,#letters{max-height:360px;overflow-y:auto;overscroll-behavior:contain;padding-right:6px;scrollbar-width:thin;scrollbar-color:#c5a3ff transparent}
+#slogans::-webkit-scrollbar,#letters::-webkit-scrollbar{width:6px}
+#slogans::-webkit-scrollbar-thumb,#letters::-webkit-scrollbar-thumb{background:#c5a3ff}
+
 /* 화면 맨 아래 미니 플레이어 */
 .ticker{width:min(560px,calc(100% - 28px));margin:10px auto 0}
 .under{position:fixed;left:0;right:0;bottom:0;z-index:5000;width:100%;margin:0;padding:8px 12px calc(8px + env(safe-area-inset-bottom));
@@ -768,7 +773,6 @@ body.has-player main{padding-bottom:90px}
         <input name="password" type="hidden" />
       </div>
       <input name="message" maxlength="40" placeholder="한 줄 응원 (40자까지)" required />
-      <div class="photo-row"><label class="photo-pick"><input type="file" name="photo" accept="image/*" hidden><span>📷 사진 첨부</span></label><span class="photo-prev" hidden><img alt=""><button type="button" class="photo-x" aria-label="사진 빼기">✕</button></span></div>
       <button type="submit">무대에 띄우기</button>
       <p class="form-msg" role="status"></p>
       <button type="button" class="my-link" data-go-my>✎ 내가 쓴 글 수정·삭제하기</button>
@@ -782,7 +786,7 @@ body.has-player main{padding-bottom:90px}
     <button type="button" class="block-head fold-head" aria-expanded="false" aria-controls="letter-sec-body">
       <span class="eyebrow">FAN LETTER</span>
       <span class="h2"><img class="px t-ico" data-icon="letter" alt="">팬레터함</span>
-      <span class="desc">생일 축하 편지를 남겨 주세요. 모두가 함께 읽을 수 있어요.</span>
+      <span class="desc">대장에게 편지를 남겨 주세요!</span>
     <span class="fold-arrow" aria-hidden="true">▼</span></button>
       <div class="block-body" id="letter-sec-body" hidden>
     <form class="post-form" data-kind="guestbook" autocomplete="off">
@@ -2108,8 +2112,7 @@ window.SITE = {
       im.addEventListener("click", () => openLightbox(r.image_url));
       $(".msg", li).after(im);
     }
-    if (myIds.has(Number(r.id))) $(".del", li).addEventListener("click", () => askDelete(kind, li, r.id));
-    else $(".del", li).remove();
+    $(".del", li).remove(); // 수정·삭제는 '내가 쓴 글'에서
     return li;
   }
 
@@ -2177,15 +2180,15 @@ window.SITE = {
   $$(".post-form[data-kind]").forEach((form) => {
     const kind = form.dataset.kind;
     const msg = $(".form-msg", form);
-    const fileIn = $('input[name="photo"]', form), prev = $(".photo-prev", form);
-    const clearPhoto = () => { fileIn.value = ""; prev.hidden = true; $("img", prev).removeAttribute("src"); };
-    fileIn.addEventListener("change", () => {
+    const fileIn = $('input[name="photo"]', form) || { files: [], value: "", addEventListener() {} }, prev = $(".photo-prev", form);
+    const clearPhoto = () => { fileIn.value = ""; if (!prev) return; prev.hidden = true; $("img", prev).removeAttribute("src"); };
+    if (prev) fileIn.addEventListener("change", () => {
       const f = fileIn.files[0];
       if (!f) return clearPhoto();
       if (!/^image\//.test(f.type)) { msg.textContent = "사진 파일만 올릴 수 있어요."; return clearPhoto(); }
       $("img", prev).src = URL.createObjectURL(f); prev.hidden = false; msg.textContent = "";
     });
-    $(".photo-x", form).addEventListener("click", clearPhoto);
+    if (prev) $(".photo-x", form).addEventListener("click", clearPhoto);
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (Date.now() - Number(store.get("lastPost") || 0) < 15000) { msg.textContent = "조금만 기다렸다가 다시 올려 주세요."; return; }
