@@ -654,7 +654,7 @@ body.has-player main{padding-bottom:90px}
   <div class="ticker" id="ticker" aria-label="축하 메시지"><span id="ticker-text">축하 메시지가 여기에 흘러가요</span></div>
 
   <div class="under" id="under">
-    <div class="np" id="np" hidden><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span>NOW PLAYING · <b id="np-title"></b></span><button type="button" id="np-toggle" aria-expanded="false" hidden>▼ 영상 보기</button><button type="button" id="np-stop">끄기</button><span class="np-hint" id="np-hint" hidden>▶ 영상의 재생 버튼을 한 번 눌러 주세요</span></div>
+    <div class="np" id="np" hidden><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span>NOW PLAYING · <b id="np-title"></b></span><button type="button" id="np-toggle" aria-expanded="false" hidden>▼ 영상 보기</button><button type="button" id="np-stop">끄기</button><span class="np-hint" id="np-hint" hidden>🔇 화면 아무 곳이나 한 번 누르면 소리가 나와요</span></div>
   </div>
 </section>
 
@@ -867,7 +867,28 @@ window.SITE = {
     return m ? m[1] : null;
   }
   // 유튜브 플레이어를 하나만 만들어 두고 곡만 바꿔 끼운다 → 곡을 누르면 바로 재생
-  let ytPlayer = null, ytApi = false, ytWant = null, hintT = 0;
+  let ytPlayer = null, ytApi = false, ytWant = null, hintT = 0, soundPending = false;
+  // 화면 아무 곳이나 처음 누르면 소리 켜기
+  document.addEventListener("pointerdown", () => {
+    if (!soundPending || !ytPlayer) return;
+    try { ytPlayer.unMute(); ytPlayer.setVolume(100); ytPlayer.playVideo(); } catch {}
+    soundPending = false; tapHint(false);
+  }, true);
+  // 소리 있는 자동재생이 막힌 폰(아이폰 등): 소리 없이 먼저 재생하고, 화면을 한 번 누르면 소리를 켠다
+  function checkAutoplay() {
+    clearTimeout(hintT);
+    hintT = setTimeout(() => {
+      try {
+        const st = ytPlayer && ytPlayer.getPlayerState(); if (ytPlayer && (st === -1 || st === 5 || st === 2)) { ytPlayer.mute(); ytPlayer.playVideo(); soundPending = true; tapHint(true); }
+      } catch {}
+    }, 1800);
+  }
+  function playNext() {
+    const list = [S.bgm, ...S.setlist].filter(Boolean);
+    const i = current ? list.findIndex((x) => x.url === current.url) : -1;
+    const nx = list[(i + 1) % list.length];
+    if (nx) play(nx.url, nx.title, true);
+  }
   (() => { const t = document.createElement("script"); t.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(t); })();
   window.onYouTubeIframeAPIReady = () => { ytApi = true; if (ytWant) loadVideo(ytWant); };
   const tapHint = (on) => { const h = $("#np-hint"); if (h) h.hidden = !on; };
@@ -883,14 +904,15 @@ window.SITE = {
         videoId: id,
         playerVars: { autoplay: 1, rel: 0, playsinline: 1 },
         events: {
-          onReady: (e) => { e.target.playVideo(); },
-          onStateChange: (e) => { if (e.data === 1) tapHint(false); },
+          onReady: (e) => { e.target.playVideo(); checkAutoplay(); },
+          onStateChange: (e) => {
+            if (e.data === 1 && !soundPending) tapHint(false);
+            if (e.data === 0) playNext(); // 한 곡이 끝나면 다음 곡 (HOME 다음엔 셋리스트 1번부터)
+          },
         },
       });
     }
-    clearTimeout(hintT);
-    // 아이폰 등에서 처음 한 번은 영상의 재생 버튼을 직접 눌러야 할 수 있어서 안내
-    hintT = setTimeout(() => { try { if (!ytPlayer || ytPlayer.getPlayerState() !== 1) tapHint(true); } catch { tapHint(true); } }, 2500);
+    if (ytPlayer && ytPlayer.loadVideoById) checkAutoplay();
   }
   function expand() {
     if (!current) return;
@@ -1209,7 +1231,7 @@ window.SITE = {
     gate.classList.add("hide");
     document.body.classList.remove("locked");
     try { sessionStorage.setItem("entered", "1"); } catch {}
-    if (S.bgm && slot.hidden) play(S.bgm.url, S.bgm.title);
+    if (S.bgm && slot.hidden) play(S.bgm.url, S.bgm.title, true); // 입장 버튼을 누른 순간이라 폰에서도 바로 재생
     document.dispatchEvent(new Event("hs:enter"));
   }
   $("#enter-btn").addEventListener("click", enter);
