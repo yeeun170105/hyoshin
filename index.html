@@ -526,7 +526,7 @@ main{background:
 .post-img{display:block;max-width:100%;max-height:200px;margin-top:8px;border:2px solid var(--px-ink);cursor:zoom-in;object-fit:contain;background:#f6f1ff}
 
 /* 세로 폰에서 무대만 돌려서 크게 보기 (화면 회전이 막힌 인스타 등에서도) */
-.rot-btn{margin-left:auto;padding:3px 8px;border:2px solid #efe6ff;background:rgba(20,10,40,.6);color:#efe6ff;font-family:"Galmuri9",monospace;font-size:10px;cursor:pointer;white-space:nowrap}
+.rot-btn{margin-left:auto;padding:1px 5px;border:1px solid rgba(239,230,255,.6);background:transparent;color:#d9ccff;font-family:"Galmuri9",monospace;font-size:8px;line-height:1.4;opacity:.8;cursor:pointer;white-space:nowrap}
 .rot-btn[hidden],.rot-close[hidden]{display:none}
 body.rot-view{overflow:hidden}
 body.rot-view::before{content:"";position:fixed;inset:0;z-index:6990;background:#07030c}
@@ -824,9 +824,9 @@ body.has-player main{padding-bottom:90px}
   <div class="welcome-card">
     <p class="w-top">🏡 HOME 🏡</p>
     <h2 id="welcome-title">Welcome to our Home</h2>
-    <p class="w-body">다 같이 응원하고, 좋아하고, 축하하고싶은<br>마음으로 만든 공간이에요 （˶ᵔᵕᵔ˶)♡ᐝ</p>
+    <p class="w-body">다 같이 응원하고, 좋아하고, 축하하고 싶은<br>마음으로 만든 공간이에요 （˶ᵔᵕᵔ˶)♡ᐝ</p>
     <p class="w-rotate">📱 휴대폰은 가로로 돌려서 보면 좋아요.</p>
-    <p class="w-inapp" id="w-inapp" hidden>인스타·카톡 안에서는 화면이 안 돌아갈 수 있어요.<br>위쪽 <b>🔄 가로로 크게</b>를 누르거나, 오른쪽 위 ⋯ 메뉴에서<br>‘외부 브라우저로 열기’를 눌러 주세요.<a class="w-ext" id="w-ext" hidden>크롬으로 열기 ▶</a></p>
+    <p class="w-inapp" id="w-inapp">화면 전환이 안 되는 경우 우측 상단<br>🔄 가로로 크게 버튼을 눌러 주세요.</p>
     <button type="button" class="w-ok" id="welcome-ok">Going Home ▶</button>
   </div>
 </div>
@@ -1358,18 +1358,11 @@ window.SITE = {
     document.dispatchEvent(new Event("hs:enter"));
     showWelcome();
   }
-  // 입장하면 한 번 뜨는 환영 팝업 (휴대폰 세로 화면이면 가로로 돌려 보라는 안내도)
+  // ENTER로 입장할 때마다 뜨는 환영 팝업 (휴대폰 세로 화면이면 가로로 돌려 보라는 안내도)
   function showWelcome() {
-    try { if (sessionStorage.getItem("welcomed") === "1") return; sessionStorage.setItem("welcomed", "1"); } catch {}
     const w = $("#welcome");
     $(".w-rotate", w).hidden = !(window.innerWidth < 700 && window.innerHeight > window.innerWidth);
-    // 인스타·카톡 등 앱 안 브라우저: 화면 회전이 막혀 있을 수 있어서 안내 (안드로이드는 크롬으로 바로 열기)
-    $("#w-inapp").hidden = !inApp;
-    if (inApp && isAndroid) {
-      const ext = $("#w-ext");
-      ext.href = `intent://${location.host}${location.pathname}#Intent;scheme=https;package=com.android.chrome;end`;
-      ext.hidden = false;
-    }
+    $("#w-inapp").hidden = $(".w-rotate", w).hidden;
     w.hidden = false;
     requestAnimationFrame(() => w.classList.add("show"));
   }
