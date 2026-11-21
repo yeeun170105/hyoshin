@@ -468,12 +468,19 @@ main{background:
 @media (max-width:520px){.floor-hint{top:46px}}
 
 /* 스크린 빈자리에 뜨는 응원 메시지 (양쪽 하나씩, 동시에 바뀜) */
-.scr-msg{position:absolute;z-index:3;width:max-content;max-width:8.5%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;
-  font-family:"Galmuri11","Noto Sans KR",monospace;font-size:.9cqw;line-height:1.4;color:#fff;word-break:keep-all;
+.scr-msg{position:absolute;z-index:3;width:max-content;max-width:7.5%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;
+  font-family:"Noto Sans KR",sans-serif;font-weight:500;font-size:max(7px,.6cqw);line-height:1.4;color:#fff;word-break:keep-all;
   text-shadow:0 0 .5cqw var(--light),0 0 1.2cqw var(--glow);opacity:0;transition:opacity 1s ease}
 .scr-msg.on{opacity:1}
 .scr-msg .by{display:block;margin-top:.25em;font-size:.78em;color:var(--bulb);opacity:.85}
-.narrow .scr-msg{display:none}
+
+.np-hint{flex-basis:100%;text-align:center;font-family:"Galmuri9",monospace;font-size:10px;color:#ffd86b;animation:tapblink 1.6s ease-in-out infinite}
+.np-hint[hidden]{display:none}
+.np{flex-wrap:wrap}
+.video-slot iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+/* 폰에서도 스크린 빈자리에 응원 메시지 */
+.narrow .scr-msg{display:block;font-size:max(4.5px,1.15cqw);max-width:16%;line-height:1.3}
+.narrow .scr-msg .by{font-size:.85em}
 
 /* 화면 맨 아래 미니 플레이어 */
 .ticker{width:min(560px,calc(100% - 28px));margin:10px auto 0}
@@ -647,7 +654,7 @@ body.has-player main{padding-bottom:90px}
   <div class="ticker" id="ticker" aria-label="축하 메시지"><span id="ticker-text">축하 메시지가 여기에 흘러가요</span></div>
 
   <div class="under" id="under">
-    <div class="np" id="np" hidden><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span>NOW PLAYING · <b id="np-title"></b></span><button type="button" id="np-toggle" aria-expanded="false" hidden>▼ 영상 보기</button><button type="button" id="np-stop">끄기</button></div>
+    <div class="np" id="np" hidden><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span>NOW PLAYING · <b id="np-title"></b></span><button type="button" id="np-toggle" aria-expanded="false" hidden>▼ 영상 보기</button><button type="button" id="np-stop">끄기</button><span class="np-hint" id="np-hint" hidden>▶ 영상의 재생 버튼을 한 번 눌러 주세요</span></div>
   </div>
 </section>
 
@@ -859,45 +866,67 @@ window.SITE = {
     const m = url.match(/(?:youtu\.be\/|v=|embed\/|shorts\/|live\/)([A-Za-z0-9_-]{11})/);
     return m ? m[1] : null;
   }
-  function makeFrame(src, title) {
-    const f = document.createElement("iframe");
-    f.src = src;
-    f.title = title || "영상";
-    f.allow = "autoplay; encrypted-media; picture-in-picture";
-    f.allowFullscreen = true;
-    return f;
+  // 유튜브 플레이어를 하나만 만들어 두고 곡만 바꿔 끼운다 → 곡을 누르면 바로 재생
+  let ytPlayer = null, ytApi = false, ytWant = null, hintT = 0;
+  (() => { const t = document.createElement("script"); t.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(t); })();
+  window.onYouTubeIframeAPIReady = () => { ytApi = true; if (ytWant) loadVideo(ytWant); };
+  const tapHint = (on) => { const h = $("#np-hint"); if (h) h.hidden = !on; };
+  function loadVideo(id) {
+    ytWant = id;
+    if (!ytApi || !window.YT || !YT.Player) return;
+    if (ytPlayer && ytPlayer.loadVideoById) { ytPlayer.loadVideoById(id); }
+    else if (!ytPlayer) {
+      const host = document.createElement("div");
+      slot.innerHTML = ""; slot.appendChild(host);
+      ytPlayer = new YT.Player(host, {
+        host: "https://www.youtube-nocookie.com",
+        videoId: id,
+        playerVars: { autoplay: 1, rel: 0, playsinline: 1 },
+        events: {
+          onReady: (e) => { e.target.playVideo(); },
+          onStateChange: (e) => { if (e.data === 1) tapHint(false); },
+        },
+      });
+    }
+    clearTimeout(hintT);
+    // 아이폰 등에서 처음 한 번은 영상의 재생 버튼을 직접 눌러야 할 수 있어서 안내
+    hintT = setTimeout(() => { try { if (!ytPlayer || ytPlayer.getPlayerState() !== 1) tapHint(true); } catch { tapHint(true); } }, 2500);
   }
   function expand() {
     if (!current) return;
-    slot.innerHTML = "";
-    slot.appendChild(makeFrame(current.src, current.title));
     slot.hidden = false;
+    if (ytWant !== current.id || !ytPlayer) loadVideo(current.id);
+    else { try { ytPlayer.playVideo(); } catch {} }
     $("#np-toggle").textContent = "▲ 접기";
     $("#np-toggle").setAttribute("aria-expanded", "true");
   }
   function collapse() {
-    // 휴대폰에서는 영상을 접어 둔다 (접으면 소리도 멈춤)
-    slot.innerHTML = "";
+    // 접으면 영상을 잠시 멈춘다 (유튜브는 화면에 보일 때만 재생)
+    try { ytPlayer && ytPlayer.pauseVideo(); } catch {}
     slot.hidden = true;
+    tapHint(false);
     $("#np-toggle").textContent = "▼ 영상 보기";
     $("#np-toggle").setAttribute("aria-expanded", "false");
   }
   function play(url, title, fromTap) {
     const id = ytId(url);
     if (!id) return false;
-    current = { url, title, src: `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1` };
+    current = { url, title, id };
     $("#np-title").textContent = title || "";
     $("#np").hidden = false;
     document.body.classList.add("has-player");
     $("#np-toggle").hidden = false;
-    if (narrow && slot.hidden) collapse(); else expand(); // 휴대폰: 접혀 있으면 접힌 채로, 펼쳐 있으면 새 곡으로
+    if (narrow && !fromTap) { ytWant = null; collapse(); } // 휴대폰: 입장할 때는 접힌 채로
+    else expand(); // 셋리스트에서 곡을 누르면 바로 펼쳐서 재생
     $$(".setlist li").forEach((li) => li.classList.toggle("playing", li.dataset.url === url));
     return true;
   }
   function stop() {
     current = null;
-    slot.innerHTML = "";
+    try { ytPlayer && ytPlayer.stopVideo(); } catch {}
+    ytWant = null;
     slot.hidden = true;
+    tapHint(false);
     $("#np").hidden = true;
     document.body.classList.remove("has-player");
     $$(".setlist li").forEach((li) => li.classList.remove("playing"));
@@ -1228,7 +1257,7 @@ window.SITE = {
     li.innerHTML = `<span class="song"></span><span class="tag"></span>`;
     $(".song", li).textContent = song.title;
     $(".tag", li).textContent = ok ? "▶ 재생" : "영상 준비 중";
-    const go = () => { if (play(song.url, song.title, false) && !narrow) venue.scrollIntoView({ behavior: "smooth" }); };
+    const go = () => { if (play(song.url, song.title, true) && !narrow) venue.scrollIntoView({ behavior: "smooth" }); };
     li.addEventListener("click", go);
     li.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
     list.appendChild(li);
@@ -1349,7 +1378,7 @@ window.SITE = {
   /* ---------- 스크린 빈자리: 응원 메시지 양쪽에 하나씩, 동시에 바뀜 ---------- */
   const stageEl = $("#stage");
   const scrEls = [$("#scr-l"), $("#scr-r")];
-  const ECX = 50, ECY = 470 / 760 * 100, ERX = 752 / 1600 * 100 * 0.96, ERY = 142 / 760 * 100 * 0.92;
+  const ECX = 50, ECY = 470 / 760 * 100, ERX = 752 / 1600 * 100 * 0.97, ERY = 142 / 760 * 100 * 0.97;
   // 왼쪽 트러스 다리 바깥선 (세로 위치 % → 가로 위치 %)
   const LEG = [[30, 50], [37.6, 49], [44.8, 47.7], [51.6, 46.2], [57.9, 44.5], [63.8, 42.5], [69.3, 40.2], [74.4, 37.8], [79.1, 35], [83.3, 32.1], [87.1, 28.9]];
   const legX = (y) => { if (y <= LEG[0][0]) return 50; for (let i = 1; i < LEG.length; i++) if (y <= LEG[i][0]) { const [y0, x0] = LEG[i - 1], [y1, x1] = LEG[i]; return x0 + (x1 - x0) * (y - y0) / (y1 - y0); } return 28; };
@@ -1362,14 +1391,15 @@ window.SITE = {
     const ph = fg ? pct(fg.getBoundingClientRect()) : null;
     el.style.left = "0"; el.style.top = "0";
     const w = el.offsetWidth / sr.width * 100, h = el.offsetHeight / sr.height * 100;
-    for (let k = 0; k < 120; k++) {
+    for (let k = 0; k < 400; k++) {
       const x = side === "l" ? rand(4, 46) : rand(54, 96);
       const y = rand(ECY - ERY, ECY + ERY);
       const L = x - w / 2, R = x + w / 2, T = y - h / 2, B = y + h / 2;
       if (![[L, T], [R, T], [L, B], [R, B]].every(([a, b]) => inEllipse(a, b))) continue;
-      if (side === "l" && R > Math.min(legX(T), legX(B)) - 1.5) continue; // 트러스 다리 피하기
-      if (side === "r" && L < 100 - Math.min(legX(T), legX(B)) + 1.5) continue;
-      if (ph && !(R < ph.l + 1.2 || L > ph.r - 1.2 || B < ph.t || T > ph.b)) continue; // 사진(흐린 가장자리 빼고) 피하기
+      if (side === "l" && R > Math.min(legX(T), legX(B)) - 0.8) continue; // 트러스 다리 피하기
+      if (side === "r" && L < 100 - Math.min(legX(T), legX(B)) + 0.8) continue;
+      const pw = ph ? (ph.r - ph.l) * 0.16 : 0; // 사진 끝의 거의 투명한 부분만 허용
+      if (ph && !(R < ph.l + pw || L > ph.r - pw || B < ph.t || T > ph.b)) continue; // 사진 위에는 절대 안 띄움
       el.style.left = x + "%"; el.style.top = y + "%";
       return true;
     }
@@ -1377,7 +1407,7 @@ window.SITE = {
   }
   let scrIdx = 0, lastScr = [];
   function nextScr() {
-    if (document.hidden || narrow || !pool.length) { scrEls.forEach((e) => e.classList.remove("on")); return; }
+    if (document.hidden || !pool.length) { scrEls.forEach((e) => e.classList.remove("on")); return; }
     scrEls.forEach((e) => e.classList.remove("on"));
     setTimeout(() => {
       // 왼쪽·오른쪽은 항상 서로 다른 글 (같은 문구도 겹치지 않게)
