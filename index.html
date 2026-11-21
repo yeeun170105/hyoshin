@@ -525,6 +525,39 @@ main{background:
 .post-form .photo-x,.photo-x{position:absolute;top:-8px;right:-8px;width:18px;height:18px;padding:0;border:2px solid var(--px-ink);border-radius:50%;background:#fff;color:#1c1a33;font-size:9px;line-height:1;cursor:pointer;box-shadow:none;min-height:0;display:grid;place-items:center}
 .post-img{display:block;max-width:100%;max-height:200px;margin-top:8px;border:2px solid var(--px-ink);cursor:zoom-in;object-fit:contain;background:#f6f1ff}
 
+/* 세로 폰에서 무대만 돌려서 크게 보기 (화면 회전이 막힌 인스타 등에서도) */
+.rot-btn{margin-left:auto;padding:3px 8px;border:2px solid #efe6ff;background:rgba(20,10,40,.6);color:#efe6ff;font-family:"Galmuri9",monospace;font-size:10px;cursor:pointer;white-space:nowrap}
+.rot-btn[hidden],.rot-close[hidden]{display:none}
+body.rot-view{overflow:hidden}
+body.rot-view::before{content:"";position:fixed;inset:0;z-index:6990;background:#07030c}
+body.rot-view #stage{--W:min(100vh,calc(100vw * 2.105));position:fixed;z-index:7000;margin:0;
+  width:var(--W);top:calc((100vh - var(--W)) / 2);left:calc((100vw + var(--W) * 0.475) / 2);transform-origin:0 0;transform:rotate(90deg)}
+@supports (height:100dvh){body.rot-view #stage{--W:min(100dvh,calc(100vw * 2.105));top:calc((100dvh - var(--W)) / 2)}}
+.rot-close{position:fixed;z-index:7100;right:-8px;bottom:40px;padding:5px 10px;border:2px solid #efe6ff;background:rgba(20,10,40,.85);color:#efe6ff;font-family:"Galmuri9",monospace;font-size:11px;cursor:pointer;transform:rotate(90deg);transform-origin:50% 50%}
+.w-inapp{margin:-6px 0 14px;font-family:"Galmuri9",monospace;font-size:9px;line-height:1.6;color:#7a6aa0}
+.w-inapp[hidden]{display:none}
+.w-ext{display:block;margin-top:6px;color:#5b3fa0;font-weight:700;text-decoration:underline;cursor:pointer}
+.w-ext[hidden]{display:none}
+/* 갤럭시 등 안드로이드: 깜빡임 줄이는 가벼운 모드 (무거운 흐림·섞기 효과 끔) */
+.lite body{transition:none}
+.lite .bulb-halo circle,.lite .meriel circle,.lite .apex,.lite .truss-glow,.lite .rim-glow,.lite .floor-glow{filter:none}
+.lite .bulb-halo circle{animation:none;opacity:.35}
+.lite .meriel circle{animation:none}
+.lite .truss-glow,.lite .rim-glow{opacity:.25}
+.lite .beam{mix-blend-mode:normal;animation:none}
+.lite .side-pic .slide .bg{filter:none;opacity:.25}
+.lite .side-pic .slide .fg{mix-blend-mode:normal}
+.lite .side-pic.has-pics::after{display:none}
+.lite .welcome,.lite .gate{backdrop-filter:none}
+
+/* 입장: 닉네임 + 비밀번호 */
+.px-gate .name-form{width:min(340px,90vw)}
+.nf-rows{flex:1;min-width:0;display:grid;gap:6px}
+.nf-row{display:grid;grid-template-columns:72px 1fr;align-items:center;gap:6px}
+.px-gate .name-form .nf-row input{font-size:13px;padding:7px 9px}
+.px-gate .name-form label{font-size:10px}
+.name-msg{min-height:14px;margin:6px 0 0;font-family:"Galmuri9",monospace;font-size:10px;color:#ffb3c7;text-align:center}
+
 /* 화면 맨 아래 미니 플레이어 */
 .ticker{width:min(560px,calc(100% - 28px));margin:10px auto 0}
 .under{position:fixed;left:0;right:0;bottom:0;z-index:5000;width:100%;margin:0;padding:8px 12px calc(8px + env(safe-area-inset-bottom));
@@ -610,17 +643,22 @@ body.has-player main{padding-bottom:90px}
   </div>
   <p class="px-hint" id="open-hint">▶ 봉투를 눌러 주세요</p>
   <form class="name-form" id="name-form" autocomplete="off">
-    <label for="guest-name">NICKNAME</label>
-    <input id="guest-name" maxlength="5" placeholder="닉네임 (5자까지)" required />
+    <div class="nf-rows">
+      <div class="nf-row"><label for="guest-name">NICKNAME</label><input id="guest-name" maxlength="5" placeholder="닉네임 (5자까지)" required /></div>
+      <div class="nf-row"><label for="guest-pw">PASSWORD</label><input id="guest-pw" type="password" maxlength="30" placeholder="비밀번호 (4자 이상)" required /></div>
+    </div>
     <button type="button" id="enter-btn" class="enter-btn">ENTER ▶</button>
   </form>
+  <p class="name-msg" id="name-msg" role="status"></p>
   <p class="gate-note">팬이 만든 공간입니다. 아티스트·소속사의 공식 서비스가 아닙니다.</p>
   <span id="ticket-no" hidden></span>
 </div>
 
 <header class="topbar">
   <span class="brand">HOME · <span class="artist-name"></span><span class="dd" id="dday-top"></span></span>
+  <button type="button" class="rot-btn" id="rot-btn" hidden>🔄 가로로 크게</button>
 </header>
+<button type="button" class="rot-close" id="rot-close" hidden>✕ 닫기</button>
 
 <section class="venue" id="venue" aria-label="공연 무대">
   <div class="stage" id="stage">
@@ -719,7 +757,7 @@ body.has-player main{padding-bottom:90px}
       <p class="me-line"><b class="me-name"></b> 이름으로 남겨요<button type="button" class="rename">이름 바꾸기</button></p>
       <input type="hidden" name="nickname" />
       <div class="row single">
-        <input name="password" type="password" maxlength="30" minlength="4" placeholder="비밀번호 (수정·삭제용, 4자 이상)" required />
+        <input name="password" type="hidden" />
       </div>
       <input name="message" maxlength="40" placeholder="한 줄 응원 (40자까지)" required />
       <div class="photo-row"><label class="photo-pick"><input type="file" name="photo" accept="image/*" hidden><span>📷 사진 첨부</span></label><span class="photo-prev" hidden><img alt=""><button type="button" class="photo-x" aria-label="사진 빼기">✕</button></span></div>
@@ -743,7 +781,7 @@ body.has-player main{padding-bottom:90px}
       <p class="me-line"><b class="me-name"></b> 이름으로 남겨요<button type="button" class="rename">이름 바꾸기</button></p>
       <input type="hidden" name="nickname" />
       <div class="row single">
-        <input name="password" type="password" maxlength="30" minlength="4" placeholder="비밀번호 (수정·삭제용, 4자 이상)" required />
+        <input name="password" type="hidden" />
       </div>
       <textarea name="message" maxlength="2000" rows="5" placeholder="편지를 적어 주세요 (2000자까지)" required></textarea>
       <div class="photo-row"><label class="photo-pick"><input type="file" name="photo" accept="image/*" hidden><span>📷 사진 첨부</span></label><span class="photo-prev" hidden><img alt=""><button type="button" class="photo-x" aria-label="사진 빼기">✕</button></span></div>
@@ -788,6 +826,7 @@ body.has-player main{padding-bottom:90px}
     <h2 id="welcome-title">Welcome to our Home</h2>
     <p class="w-body">다 같이 응원하고, 좋아하고, 축하하고싶은<br>마음으로 만든 공간이에요 （˶ᵔᵕᵔ˶)♡ᐝ</p>
     <p class="w-rotate">📱 휴대폰은 가로로 돌려서 보면 좋아요.</p>
+    <p class="w-inapp" id="w-inapp" hidden>인스타·카톡 안에서는 화면이 안 돌아갈 수 있어요.<br>위쪽 <b>🔄 가로로 크게</b>를 누르거나, 오른쪽 위 ⋯ 메뉴에서<br>‘외부 브라우저로 열기’를 눌러 주세요.<a class="w-ext" id="w-ext" hidden>크롬으로 열기 ▶</a></p>
     <button type="button" class="w-ok" id="welcome-ok">Going Home ▶</button>
   </div>
 </div>
@@ -899,6 +938,12 @@ window.SITE = {
     applyLight(LIGHTS[lightIdx]);
   }, 9000);
 
+  /* ---------- 안드로이드(갤럭시 등): 화면 깜빡임을 줄이는 가벼운 모드 ---------- */
+  const UA = navigator.userAgent || "";
+  const isAndroid = /Android/i.test(UA);
+  const inApp = /Instagram|FBAN|FBAV|KAKAOTALK|NAVER|Line\//i.test(UA);
+  if (isAndroid) document.documentElement.classList.add("lite");
+
   /* ---------- 넓은 화면 / 좁은 화면 ---------- */
   // 유튜브 플레이어는 가로 200px 이상이어야 해서, 무대가 작으면 영상을 무대 아래로 옮긴다
   const stage = $("#stage"), venue = $("#venue"), slot = $("#video-slot");
@@ -912,6 +957,16 @@ window.SITE = {
 
   }
   new ResizeObserver(layout).observe(stage);
+
+  // 세로로 든 폰: 무대만 돌려서 크게 보기
+  const rotBtn = $("#rot-btn"), rotClose = $("#rot-close");
+  const isPortraitPhone = () => window.innerWidth < 700 && window.innerHeight > window.innerWidth;
+  const updRotBtn = () => { rotBtn.hidden = !isPortraitPhone() || document.body.classList.contains("rot-view"); };
+  const rotOff = () => { document.body.classList.remove("rot-view"); rotClose.hidden = true; updRotBtn(); };
+  rotBtn.addEventListener("click", () => { document.body.classList.add("rot-view"); rotClose.hidden = false; rotBtn.hidden = true; });
+  rotClose.addEventListener("click", rotOff);
+  window.addEventListener("resize", () => { if (!isPortraitPhone()) rotOff(); else updRotBtn(); });
+  updRotBtn();
 
   /* ---------- 영상 재생 (왼쪽 스크린) ---------- */
   function ytId(url) {
@@ -1263,27 +1318,43 @@ window.SITE = {
   let guestName = [...(store.get("guestName") || "").trim()].slice(0, 5).join("");
   function applyName() {
     $$(".me-name").forEach((el) => (el.textContent = guestName));
+    try { const p = sessionStorage.getItem("gpw") || ""; $$('.post-form[data-kind] input[name="password"]').forEach((el) => (el.value = p)); } catch {}
     $$('.post-form input[name="nickname"]').forEach((el) => (el.value = guestName));
   }
   let entered = false;
   try { entered = sessionStorage.getItem("entered") === "1"; } catch {}
+  try { if (!sessionStorage.getItem("gpw")) entered = false; } catch {} // 비밀번호로 입장해야 함
   if (entered && guestName) gate.classList.add("hide"); else { document.body.classList.add("locked"); nameInput.value = guestName; }
   applyName();
   layout();
-  function enter() {
-    const v = nameInput.value.trim();
-    if (!v) {
-      nameForm.classList.remove("shake"); void nameForm.offsetWidth; nameForm.classList.add("shake");
-      nameInput.focus();
-      return;
-    }
-    guestName = [...v].slice(0, 5).join("");
+  // 닉네임은 처음 입장한 사람이 비밀번호와 함께 가져요 (다른 사람은 같은 닉네임으로 못 들어옴)
+  let guestPw = ""; try { guestPw = sessionStorage.getItem("gpw") || ""; } catch {}
+  const pwInput = $("#guest-pw"), nameMsg = $("#name-msg");
+  const shake = () => { nameForm.classList.remove("shake"); void nameForm.offsetWidth; nameForm.classList.add("shake"); };
+  let entering = false;
+  async function enter() {
+    if (entering) return;
+    const v = [...nameInput.value.trim()].slice(0, 5).join("");
+    const pw = pwInput.value;
+    if (!v) { shake(); nameInput.focus(); return; }
+    if (pw.length < 4) { shake(); nameMsg.textContent = "비밀번호를 4자 이상 적어 주세요."; pwInput.focus(); return; }
+    entering = true; nameMsg.textContent = "확인 중…";
+    // 소리 있는 재생은 버튼을 누른 순간에 시작해 둠
+    if (S.bgm && slot.hidden) play(S.bgm.url, S.bgm.title, true);
+    let res = "";
+    try { res = await rpc("claim_name", { p_nickname: v, p_password: pw }); }
+    catch { nameMsg.textContent = "잠시 후 다시 시도해 주세요."; entering = false; return; }
+    entering = false;
+    if (res === "taken") { stop(); shake(); nameMsg.textContent = "중복된 닉네임입니다."; nameInput.focus(); return; }
+    if (res === "short") { stop(); shake(); nameMsg.textContent = "비밀번호를 4자 이상 적어 주세요."; return; }
+    nameMsg.textContent = "";
+    guestName = v; guestPw = pw;
+    try { sessionStorage.setItem("gpw", pw); } catch {}
     store.set("guestName", guestName);
     applyName();
     gate.classList.add("hide");
     document.body.classList.remove("locked");
     try { sessionStorage.setItem("entered", "1"); } catch {}
-    if (S.bgm && slot.hidden) play(S.bgm.url, S.bgm.title, true); // 입장 버튼을 누른 순간이라 폰에서도 바로 재생
     document.dispatchEvent(new Event("hs:enter"));
     showWelcome();
   }
@@ -1292,6 +1363,13 @@ window.SITE = {
     try { if (sessionStorage.getItem("welcomed") === "1") return; sessionStorage.setItem("welcomed", "1"); } catch {}
     const w = $("#welcome");
     $(".w-rotate", w).hidden = !(window.innerWidth < 700 && window.innerHeight > window.innerWidth);
+    // 인스타·카톡 등 앱 안 브라우저: 화면 회전이 막혀 있을 수 있어서 안내 (안드로이드는 크롬으로 바로 열기)
+    $("#w-inapp").hidden = !inApp;
+    if (inApp && isAndroid) {
+      const ext = $("#w-ext");
+      ext.href = `intent://${location.host}${location.pathname}#Intent;scheme=https;package=com.android.chrome;end`;
+      ext.hidden = false;
+    }
     w.hidden = false;
     requestAnimationFrame(() => w.classList.add("show"));
   }
@@ -1299,10 +1377,11 @@ window.SITE = {
   $("#welcome-ok").addEventListener("click", closeWelcome);
   $("#welcome").addEventListener("click", (e) => { if (e.target.id === "welcome") closeWelcome(); });
   $("#enter-btn").addEventListener("click", enter);
+  pwInput.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); enter(); } });
   nameForm.addEventListener("submit", (e) => { e.preventDefault(); enter(); });
   $$(".rename").forEach((b) => b.addEventListener("click", () => {
     invite.classList.add("open");
-    nameInput.value = guestName;
+    nameInput.value = guestName; pwInput.value = ""; nameMsg.textContent = "";
     gate.classList.remove("hide");
     document.body.classList.add("locked");
     setTimeout(() => nameInput.focus(), 100);
@@ -1311,9 +1390,9 @@ window.SITE = {
   // 맨 아래 나가기: 음악을 끄고 처음 초대장으로
   $("#exit-btn").addEventListener("click", () => {
     stop();
-    try { sessionStorage.removeItem("entered"); } catch {}
+    try { sessionStorage.removeItem("entered"); sessionStorage.removeItem("gpw"); } catch {}
     invite.classList.remove("open");
-    nameInput.value = guestName;
+    nameInput.value = guestName; pwInput.value = ""; nameMsg.textContent = "";
     gate.classList.remove("hide");
     document.body.classList.add("locked");
     window.scrollTo({ top: 0 });
@@ -2092,7 +2171,7 @@ window.SITE = {
       const anon = kind === "guestbook" && fd.get("anon") === "on";
       if (!nickname) { $(".rename", form).click(); return; }
       if (!message) { msg.textContent = "내용을 적어 주세요."; return; }
-      if (password.length < 4) { msg.textContent = "비밀번호는 4자 이상이어야 해요."; return; }
+      if (password.length < 4) { msg.textContent = "다시 입장해 주세요. (이름 바꾸기 → 비밀번호)"; $(".rename", form).click(); return; }
       const btn = $("button[type=submit]", form);
       btn.disabled = true; msg.textContent = "올리는 중…";
       try {
@@ -2116,8 +2195,8 @@ window.SITE = {
           syncFans();
         }
         load(kind, true);
-      } catch {
-        msg.textContent = "올리지 못했어요. 잠시 후 다시 시도해 주세요.";
+      } catch (err) {
+        msg.textContent = /name taken/.test(String(err)) ? "중복된 닉네임입니다. 다시 입장해 주세요." : "올리지 못했어요. 잠시 후 다시 시도해 주세요.";
       } finally { btn.disabled = false; }
     });
   });
