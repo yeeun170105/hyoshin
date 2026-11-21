@@ -529,10 +529,9 @@ main{background:
 .rot-btn{margin-left:auto;padding:1px 5px;border:1px solid rgba(239,230,255,.6);background:transparent;color:#d9ccff;font-family:"Galmuri9",monospace;font-size:8px;line-height:1.4;opacity:.8;cursor:pointer;white-space:nowrap}
 .rot-btn[hidden],.rot-close[hidden]{display:none}
 body.rot-view{overflow:hidden}
-body.rot-view::before{content:"";position:fixed;inset:0;z-index:6990;background:#07030c}
-body.rot-view #stage{--W:min(100vh,calc(100vw * 2.105));position:fixed;z-index:7000;margin:0;
-  width:var(--W);top:calc((100vh - var(--W)) / 2);left:calc((100vw + var(--W) * 0.475) / 2);transform-origin:0 0;transform:rotate(90deg)}
-@supports (height:100dvh){body.rot-view #stage{--W:min(100dvh,calc(100vw * 2.105));top:calc((100dvh - var(--W)) / 2)}}
+body.rot-view #page{position:fixed;z-index:7000;top:0;left:100vw;width:100vh;height:100vw;transform-origin:0 0;transform:rotate(90deg);overflow-x:hidden;overflow-y:auto;touch-action:none;background:#07030c}
+@supports (height:100dvh){body.rot-view #page{width:100dvh}}
+body.rot-view .under{display:none}
 .rot-close{position:fixed;z-index:7100;right:-8px;bottom:40px;padding:5px 10px;border:2px solid #efe6ff;background:rgba(20,10,40,.85);color:#efe6ff;font-family:"Galmuri9",monospace;font-size:11px;cursor:pointer;transform:rotate(90deg);transform-origin:50% 50%}
 .w-inapp{margin:-6px 0 14px;font-family:"Galmuri9",monospace;font-size:9px;line-height:1.6;color:#7a6aa0}
 .w-inapp[hidden]{display:none}
@@ -557,6 +556,14 @@ body.rot-view #stage{--W:min(100vh,calc(100vw * 2.105));position:fixed;z-index:7
 .px-gate .name-form .nf-row input{font-size:13px;padding:7px 9px}
 .px-gate .name-form label{font-size:10px}
 .name-msg{min-height:14px;margin:6px 0 0;font-family:"Galmuri9",monospace;font-size:10px;color:#ffb3c7;text-align:center}
+
+/* 스탠딩 밑 흐르는 글 숨김 */
+.ticker{display:none!important}
+/* 메뉴: 얇게, 아이콘 작게 */
+.mh-nav button{gap:3px;padding:6px 2px 5px;font-size:10px}
+.mh-nav button img{width:20px}
+/* 응원·편지·셋리스트는 탭처럼 하나만 보임 */
+main .block.tab-off{display:none}
 
 /* 화면 맨 아래 미니 플레이어 */
 .ticker{width:min(560px,calc(100% - 28px));margin:10px auto 0}
@@ -654,6 +661,7 @@ body.has-player main{padding-bottom:90px}
   <span id="ticket-no" hidden></span>
 </div>
 
+<div id="page">
 <header class="topbar">
   <span class="brand">HOME · <span class="artist-name"></span><span class="dd" id="dday-top"></span></span>
   <button type="button" class="rot-btn" id="rot-btn" hidden>🔄 가로로 크게</button>
@@ -820,6 +828,11 @@ body.has-player main{padding-bottom:90px}
   <button type="button" class="exit-btn" id="exit-btn">🚪 나가기 <small>초대장으로 돌아가요</small></button>
   <div class="video-dock" id="video-dock"><div class="video-slot" id="video-slot" hidden></div></div>
 </main>
+<footer class="footer">
+  <p>팬이 만든 공간입니다. 아티스트·소속사의 공식 서비스가 아닙니다.</p>
+  <p>글에 개인정보를 적지 말아 주세요. 남긴 글은 모두에게 공개돼요.</p>
+</footer>
+</div>
 <div class="welcome" id="welcome" hidden role="dialog" aria-modal="true" aria-labelledby="welcome-title">
   <div class="welcome-card">
     <p class="w-top">🏡 HOME 🏡</p>
@@ -832,10 +845,7 @@ body.has-player main{padding-bottom:90px}
 </div>
 <div class="lightbox" id="lightbox" hidden><div style="display:grid;justify-items:center;max-height:100%"><img alt=""><p>화면을 누르면 닫혀요</p></div></div>
 
-<footer class="footer">
-  <p>팬이 만든 공간입니다. 아티스트·소속사의 공식 서비스가 아닙니다.</p>
-  <p>글에 개인정보를 적지 말아 주세요. 남긴 글은 모두에게 공개돼요.</p>
-</footer>
+
 
 <script>
 // ============================================================
@@ -944,6 +954,13 @@ window.SITE = {
   const inApp = /Instagram|FBAN|FBAV|KAKAOTALK|NAVER|Line\//i.test(UA);
   if (isAndroid) document.documentElement.classList.add("lite");
 
+  // 화면을 돌려 볼 때(가로로 크게)도 누른 자리를 정확히 계산
+  function localFrac(el, e) {
+    const r = el.getBoundingClientRect();
+    if (document.body.classList.contains("rot-view")) return { fx: (e.clientY - r.top) / r.height, fy: (r.right - e.clientX) / r.width };
+    return { fx: (e.clientX - r.left) / r.width, fy: (e.clientY - r.top) / r.height };
+  }
+
   /* ---------- 넓은 화면 / 좁은 화면 ---------- */
   // 유튜브 플레이어는 가로 200px 이상이어야 해서, 무대가 작으면 영상을 무대 아래로 옮긴다
   const stage = $("#stage"), venue = $("#venue"), slot = $("#video-slot");
@@ -963,7 +980,16 @@ window.SITE = {
   const isPortraitPhone = () => window.innerWidth < 700 && window.innerHeight > window.innerWidth;
   const updRotBtn = () => { rotBtn.hidden = !isPortraitPhone() || document.body.classList.contains("rot-view"); };
   const rotOff = () => { document.body.classList.remove("rot-view"); rotClose.hidden = true; updRotBtn(); };
-  rotBtn.addEventListener("click", () => { document.body.classList.add("rot-view"); rotClose.hidden = false; rotBtn.hidden = true; });
+  const pageEl = $("#page");
+  rotBtn.addEventListener("click", () => { document.body.classList.add("rot-view"); rotClose.hidden = false; rotBtn.hidden = true; pageEl.scrollTop = 0; });
+  // 돌린 화면에서는 손가락을 옆으로 밀면 위아래로 스크롤 (화면을 눕혀 보면 위아래로 미는 것)
+  let tY = null;
+  pageEl.addEventListener("touchstart", (e) => { if (document.body.classList.contains("rot-view")) tY = e.touches[0].clientX; }, { passive: true });
+  pageEl.addEventListener("touchmove", (e) => {
+    if (tY == null || !document.body.classList.contains("rot-view")) return;
+    const x = e.touches[0].clientX; pageEl.scrollTop -= (tY - x); tY = x; e.preventDefault();
+  }, { passive: false });
+  pageEl.addEventListener("touchend", () => { tY = null; });
   rotClose.addEventListener("click", rotOff);
   window.addEventListener("resize", () => { if (!isPortraitPhone()) rotOff(); else updRotBtn(); });
   updRotBtn();
@@ -1401,19 +1427,25 @@ window.SITE = {
       h.setAttribute("aria-expanded", String(open));
     });
   });
+  const TABS = ["slogan-sec", "letter-sec", "setlist-sec"];
+  function showTab(id) {
+    TABS.forEach((t) => { const el = document.getElementById(t); if (el) el.classList.toggle("tab-off", t !== id); });
+    $$(".mh-nav button").forEach((x) => x.classList.toggle("on", x.dataset.go === id));
+  }
   function openBlock(id) {
+    if (TABS.includes(id)) showTab(id);
     const block = document.getElementById(id); if (!block) return;
     const body = $(".block-body", block), h = $(".fold-head", block);
     if (!body) return;
     body.hidden = false; block.classList.add("open"); h.setAttribute("aria-expanded", "true");
   }
   $$(".mh-nav button").forEach((b) => b.addEventListener("click", () => {
-    $$(".mh-nav button").forEach((x) => x.classList.toggle("on", x === b));
     const id = b.dataset.go;
-    if (id !== "venue" && id !== "floor") openBlock(id);
-    const target = document.getElementById(id);
+    if (TABS.includes(id)) { openBlock(id); return; } // 응원·편지·셋리스트: 그것만 보이게 (위치는 그대로)
+    const target = document.getElementById(id); // 무대·스탠딩: 그 자리로 이동
     if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
   }));
+  showTab("slogan-sec");
 
   /* ---------- 셋리스트 ---------- */
   const list = $("#setlist");
@@ -1969,9 +2001,9 @@ window.SITE = {
     if (treeAt(e)) return; // 나무를 누르면 누가 심었는지 보여 줌
     if (!ensureMe()) return;
     wake();
-    const r = floor.getBoundingClientRect();
-    const x = clamp(((e.clientX - r.left) / r.width) * 100, 4, 96);
-    const y = clamp(((e.clientY - r.top) / r.height) * 100 + 6, Y_MIN, Y_MAX); // 발이 누른 자리에 오도록
+    const lf = localFrac(floor, e);
+    const x = clamp(lf.fx * 100, 4, 96);
+    const y = clamp(lf.fy * 100 + 6, Y_MIN, Y_MAX); // 발이 누른 자리에 오도록
     me.tx = x; me.ty = y; me.wait = 0;
     push({ t: "mv", x: Math.round(x), y: Math.round(y) });
     $("#floor-hint").hidden = true;
@@ -2331,7 +2363,8 @@ window.SITE = {
   const tip = $("#tree-tip");
   function treeAt(e) {
     const r = grove.getBoundingClientRect();
-    const cx = e.clientX - r.left, cy = e.clientY - r.top;
+    const lf = localFrac(grove, e);
+    const cx = lf.fx * grove.clientWidth, cy = lf.fy * grove.clientHeight;
     if (cy < 0) return false;
     let best = null, bd = 9;
     for (const t of trees) {
@@ -2342,8 +2375,8 @@ window.SITE = {
     if (!best) return false;
     const fr = floor.getBoundingClientRect();
     tip.textContent = `${best.t.n}의 나무`;
-    tip.style.left = (r.left - fr.left + best.px) + "px";
-    tip.style.top = (r.top - fr.top + best.py - 9 * best.sc) + "px";
+    tip.style.left = (grove.offsetLeft + best.px) + "px";
+    tip.style.top = (grove.offsetTop + best.py - 9 * best.sc) + "px";
     tip.hidden = false;
     clearTimeout(tip.t); tip.t = setTimeout(() => { tip.hidden = true; }, 2000);
     return true;
