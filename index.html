@@ -490,6 +490,18 @@ main{background:
 .exit-btn small{font-weight:400;font-size:10px;color:#9b8fb8;margin-left:6px}
 .exit-btn:active{transform:translate(2px,2px)}
 
+/* 영상은 맨 아래(나가기 밑)에 붙어 있고, 화면 아래 줄에서 노래 정보·끄기 */
+.video-dock{width:min(560px,calc(100% - 28px));margin:0 auto 36px}
+.video-dock .video-slot{border:4px solid var(--px-ink);border-radius:0;box-shadow:4px 4px 0 var(--px-lav)}
+/* 응원 메시지: 세로로 한 줄씩 */
+.slogans{display:grid;gap:10px;justify-content:stretch}
+.slogans li{transform:none;max-width:none;padding:12px 14px;text-align:left}
+.slogans .head{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:4px}
+.slogans .who{margin:0;font-family:"Galmuri11",monospace;font-size:12px;color:var(--px-purple)}
+.slogans .when{font-family:"Galmuri9",monospace;font-size:10px;color:#a99fc0}
+.slogans .msg{font-size:13px;font-weight:400}
+.slogans .del,.letters .del{margin-top:8px}
+
 /* 화면 맨 아래 미니 플레이어 */
 .ticker{width:min(560px,calc(100% - 28px));margin:10px auto 0}
 .under{position:fixed;left:0;right:0;bottom:0;z-index:5000;width:100%;margin:0;padding:8px 12px calc(8px + env(safe-area-inset-bottom));
@@ -498,7 +510,6 @@ main{background:
 .under .np{margin:0;flex-wrap:nowrap;font-size:12px;max-width:100%}
 .under .np span:not(.eq){white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .under .video-slot{order:-1;margin:0 auto 8px}
-.venue:not(.narrow) .under .video-slot{position:fixed;right:16px;bottom:58px;width:200px;margin:0;z-index:41}
 body.has-player .footer{padding-bottom:calc(min(30vw,170px) + 64px)!important}
 
 /* 접었다 펴는 메뉴 + 작은 글씨 */
@@ -628,7 +639,6 @@ body.has-player main{padding-bottom:90px}
     <div class="side-pic r" id="pic-r"><p class="led side-led"><span class="big">LOVE IS HERE</span><span>SOUL TREE</span></p></div>
     <div class="scr-msg" id="scr-l"></div>
     <div class="scr-msg" id="scr-r"></div>
-    <div class="video-slot" id="video-slot" hidden></div>
 
     <svg class="front" viewBox="0 0 1600 760" preserveAspectRatio="none" aria-hidden="true">
 <ellipse cx="800" cy="664" rx="420" ry="26" class="floor-glow"/>
@@ -678,8 +688,8 @@ body.has-player main{padding-bottom:90px}
   <section class="block" id="slogan-sec">
     <button type="button" class="block-head fold-head" aria-expanded="false" aria-controls="slogan-sec-body">
       <span class="eyebrow">MESSAGE</span>
-      <span class="h2"><img class="px t-ico" data-icon="chat" alt="">응원 메시지</span>
-      <span class="desc">남긴 한 줄 응원은 무대 오른쪽 스크린에 떠올라요.</span>
+      <span class="h2"><img class="px t-ico" data-icon="chat" alt="">대장에게 소중한 한마디!</span>
+      <span class="desc">남긴 한 줄 응원은 무대 스크린과 내 미니미 위에 떠올라요.</span>
     <span class="fold-arrow" aria-hidden="true">▼</span></button>
       <div class="block-body" id="slogan-sec-body" hidden>
     <form class="post-form" data-kind="ilchon" autocomplete="off">
@@ -721,7 +731,7 @@ body.has-player main{padding-bottom:90px}
 
     <div class="my-box" id="my-box">
       <p class="my-title">✎ 내가 쓴 글 <small>수정·삭제</small></p>
-      <p class="my-desc">글을 쓸 때 쓴 닉네임과 비밀번호를 넣으면 내 응원 메시지와 편지가 모두 나와요. 비공개로 쓴 편지도 여기서 찾을 수 있어요.</p>
+      <p class="my-desc">글을 쓸 때 쓴 닉네임과 비밀번호를 넣으면 내 한마디와 편지가 모두 나와요. 비공개로 쓴 편지도 여기서 찾을 수 있어요.</p>
       <form class="post-form my-form" id="my-form" autocomplete="off">
         <div class="row">
           <input name="nick" maxlength="5" placeholder="닉네임" required />
@@ -745,6 +755,7 @@ body.has-player main{padding-bottom:90px}
         </div>
     </section>
   <button type="button" class="exit-btn" id="exit-btn">🚪 나가기 <small>초대장으로 돌아가요</small></button>
+  <div class="video-dock" id="video-dock"><div class="video-slot" id="video-slot" hidden></div></div>
 </main>
 <div class="lightbox" id="lightbox" hidden><div style="display:grid;justify-items:center;max-height:100%"><img alt=""><p>화면을 누르면 닫혀요</p></div></div>
 
@@ -864,8 +875,7 @@ window.SITE = {
     if (isNarrow === narrow) return;
     narrow = isNarrow;
     venue.classList.toggle("narrow", narrow);
-    if (slot.parentNode !== $("#under")) $("#under").prepend(slot);
-    if (current) { if (narrow) collapse(); else expand(); }
+
   }
   new ResizeObserver(layout).observe(stage);
 
@@ -928,16 +938,12 @@ window.SITE = {
     slot.hidden = false;
     if (ytWant !== current.id || !ytPlayer) loadVideo(current.id);
     else { try { ytPlayer.playVideo(); } catch {} }
-    $("#np-toggle").textContent = "▲ 접기";
-    $("#np-toggle").setAttribute("aria-expanded", "true");
+    $("#np-toggle").textContent = "▼ 영상 보기";
   }
   function collapse() {
-    // 접으면 영상을 잠시 멈춘다 (유튜브는 화면에 보일 때만 재생)
-    try { ytPlayer && ytPlayer.pauseVideo(); } catch {}
+    // 아직 재생 전 (새로고침 등): 영상 자리는 숨기고 ▶ 재생 버튼만
     slot.hidden = true;
-    tapHint(false);
-    $("#np-toggle").textContent = "▼ 영상 보기";
-    $("#np-toggle").setAttribute("aria-expanded", "false");
+    $("#np-toggle").textContent = "▶ 재생";
   }
   function play(url, title, fromTap) {
     const id = ytId(url);
@@ -947,8 +953,8 @@ window.SITE = {
     $("#np").hidden = false;
     document.body.classList.add("has-player");
     $("#np-toggle").hidden = false;
-    if (narrow && !fromTap) { ytWant = null; collapse(); } // 휴대폰: 입장할 때는 접힌 채로
-    else expand(); // 셋리스트에서 곡을 누르면 바로 펼쳐서 재생
+    if (!fromTap) { ytWant = null; collapse(); } // 누르지 않고 시작된 경우(새로고침)는 ▶ 재생을 눌러야
+    else expand(); // 입장·셋리스트 곡을 누르면 바로 재생 (영상은 맨 아래 나가기 밑)
     $$(".setlist li").forEach((li) => li.classList.toggle("playing", li.dataset.url === url));
     return true;
   }
@@ -962,7 +968,10 @@ window.SITE = {
     document.body.classList.remove("has-player");
     $$(".setlist li").forEach((li) => li.classList.remove("playing"));
   }
-  $("#np-toggle").addEventListener("click", () => { if (slot.hidden) expand(); else collapse(); });
+  $("#np-toggle").addEventListener("click", () => {
+    if (slot.hidden) expand();
+    $("#video-dock").scrollIntoView({ behavior: "smooth", block: "center" });
+  });
   $("#np-stop").addEventListener("click", stop);
 
 
@@ -1298,7 +1307,7 @@ window.SITE = {
     li.innerHTML = `<span class="song"></span><span class="tag"></span>`;
     $(".song", li).textContent = song.title;
     $(".tag", li).textContent = ok ? "▶ 재생" : "영상 준비 중";
-    const go = () => { if (play(song.url, song.title, true) && !narrow) venue.scrollIntoView({ behavior: "smooth" }); };
+    const go = () => { play(song.url, song.title, true); };
     li.addEventListener("click", go);
     li.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
     list.appendChild(li);
@@ -1739,8 +1748,8 @@ window.SITE = {
   }
 
   /* ---------- 실시간: 지금 접속한 사람들 ---------- */
-  // Supabase Realtime 무료: 동시 접속 200명, 초당 메시지 100개 → 8명씩 '관'으로 나누고, 동작은 2.5초마다 모아서 보낸다
-  const ROOM_MAX = 8, FLUSH_MS = 2500;
+  // Supabase Realtime 무료: 동시 접속 200명, 초당 메시지 100개 → 15명씩 관으로 나누고, 동작은 4초마다 모아서 보낸다
+  const ROOM_MAX = 15, FLUSH_MS = 4000;
   let me = null, sb = null, ch = null, room = 0, liveCount = 0, rtOn = false, queue = [], idleT = 0;
   const myId = (() => { try { return sessionStorage.getItem("cid") || (sessionStorage.setItem("cid", Math.random().toString(36).slice(2, 10)), sessionStorage.getItem("cid")); } catch { return Math.random().toString(36).slice(2, 10); } })();
   function ensureMe() {
@@ -1927,13 +1936,16 @@ window.SITE = {
     }
   }
 
+  // 내가 쓴 글 번호 (이 폰/브라우저에 저장) → 내 글에만 삭제 버튼
+  const myIds = new Set((() => { try { return JSON.parse(store.get("myPosts") || "[]"); } catch { return []; } })());
+  const saveMine = (id) => { if (id == null) return; myIds.add(Number(id)); store.set("myPosts", JSON.stringify([...myIds].slice(-200))); };
   function render(kind, r) {
     const li = document.createElement("li");
     if (kind === "ilchon") {
-      li.style.setProperty("--tilt", `${(Math.random() * 6 - 3).toFixed(1)}deg`);
-      li.innerHTML = `<span class="msg"></span><span class="who"><span class="name"></span><button class="del" type="button">삭제</button></span>`;
+      li.innerHTML = `<div class="head"><span class="who"></span><span class="when"></span></div><span class="msg"></span><button class="del" type="button">삭제</button>`;
       $(".msg", li).textContent = r.message;
-      $(".name", li).textContent = `— ${r.nickname}`;
+      $(".who", li).textContent = r.nickname;
+      $(".when", li).textContent = fmt(r.created_at);
     } else {
       li.innerHTML = `<div class="head"><span class="who"></span><span class="when"></span></div><p class="msg"></p><button class="del" type="button">삭제</button>`;
       $(".who", li).textContent = r.nickname;
@@ -1941,7 +1953,8 @@ window.SITE = {
       if (r.updated_at) { const e = document.createElement("span"); e.className = "edited"; e.textContent = "(수정됨)"; $(".when", li).appendChild(e); }
       $(".msg", li).textContent = r.message;
     }
-    $(".del", li).addEventListener("click", () => askDelete(kind, li, r.id));
+    if (myIds.has(Number(r.id))) $(".del", li).addEventListener("click", () => askDelete(kind, li, r.id));
+    else $(".del", li).remove();
     return li;
   }
 
@@ -1990,7 +2003,8 @@ window.SITE = {
       const btn = $("button[type=submit]", form);
       btn.disabled = true; msg.textContent = "올리는 중…";
       try {
-        await rpc("add_post", { p_kind: kind, p_nickname: nickname, p_ilchon_name: null, p_message: message, p_password: password, p_anon: anon });
+        const newId = await rpc("add_post", { p_kind: kind, p_nickname: nickname, p_ilchon_name: null, p_message: message, p_password: password, p_anon: anon });
+        saveMine(newId);
         store.set("lastPost", String(Date.now()));
         form.reset();
         applyName();
@@ -2018,7 +2032,8 @@ window.SITE = {
       myList.innerHTML = "";
       if (!rows.length) { myMsg.textContent = "글을 찾지 못했어요. 닉네임과 비밀번호를 확인해 주세요."; return; }
       myMsg.textContent = `${rows.length}개의 글을 찾았어요.`;
-      rows.forEach((r) => myList.appendChild(renderMine(r)));
+      rows.forEach((r) => { saveMine(r.id); myList.appendChild(renderMine(r)); });
+      load("ilchon", true); load("guestbook", true); // 찾은 내 글에 삭제 버튼 붙이기
     } catch { myMsg.textContent = "잠시 후 다시 시도해 주세요."; }
   }
   function renderMine(r) {
