@@ -373,7 +373,7 @@ main{background:
 
 
 /* 양쪽 스크린 사진 */
-.side-pic{position:absolute;z-index:3;top:40%;width:46.5%;height:42%;display:grid;place-items:center;text-align:center;overflow:hidden}
+.side-pic{position:absolute;z-index:3;top:38.5%;width:46.5%;height:45.5%;display:grid;place-items:center;text-align:center;overflow:hidden}
 /* 타원 스크린 반쪽 모양으로 가장자리를 흐리고, 가운데(트러스) 쪽으로 갈수록 은은하게 */
 .side-pic.l{left:2.5%;
   -webkit-mask-image:radial-gradient(100% 50% at 100% 50%,#000 60%,transparent 98%),linear-gradient(to left,transparent,rgba(0,0,0,.55) 22%,#000 45%);
@@ -388,11 +388,11 @@ main{background:
 .side-pic .slide.on{opacity:1}
 /* 뒤: 같은 사진을 흐리게 깔아서 스크린을 꽉 채움 / 앞: 사진 전체(로고 포함)가 잘리지 않게 */
 .side-pic .slide .bg{position:absolute;inset:-12%;width:124%;height:124%;object-fit:cover;filter:blur(26px) saturate(1.3) brightness(.55);mix-blend-mode:screen;opacity:.8}
-.side-pic .slide .fg{position:absolute;top:3%;height:94%;width:auto;max-width:92%;left:50%;object-fit:contain;mix-blend-mode:normal;filter:contrast(1.04) saturate(1.05);
-  -webkit-mask-image:radial-gradient(50% 50% at 50% 50%,#000 58%,rgba(0,0,0,.7) 72%,rgba(0,0,0,.25) 88%,transparent 100%);
-  mask-image:radial-gradient(50% 50% at 50% 50%,#000 58%,rgba(0,0,0,.7) 72%,rgba(0,0,0,.25) 88%,transparent 100%);
+.side-pic .slide .fg{position:absolute;top:0;height:100%;width:auto;max-width:96%;left:50%;object-fit:contain;mix-blend-mode:normal;filter:contrast(1.04) saturate(1.05);
+  -webkit-mask-image:linear-gradient(to right,transparent,rgba(0,0,0,.06) 5%,rgba(0,0,0,.18) 10%,rgba(0,0,0,.36) 16%,rgba(0,0,0,.58) 23%,rgba(0,0,0,.8) 30%,rgba(0,0,0,.94) 36%,#000 41%,#000 59%,rgba(0,0,0,.94) 64%,rgba(0,0,0,.8) 70%,rgba(0,0,0,.58) 77%,rgba(0,0,0,.36) 84%,rgba(0,0,0,.18) 90%,rgba(0,0,0,.06) 95%,transparent),linear-gradient(to bottom,transparent,#000 6%,#000 94%,transparent);
+  mask-image:linear-gradient(to right,transparent,rgba(0,0,0,.06) 5%,rgba(0,0,0,.18) 10%,rgba(0,0,0,.36) 16%,rgba(0,0,0,.58) 23%,rgba(0,0,0,.8) 30%,rgba(0,0,0,.94) 36%,#000 41%,#000 59%,rgba(0,0,0,.94) 64%,rgba(0,0,0,.8) 70%,rgba(0,0,0,.58) 77%,rgba(0,0,0,.36) 84%,rgba(0,0,0,.18) 90%,rgba(0,0,0,.06) 95%,transparent),linear-gradient(to bottom,transparent,#000 6%,#000 94%,transparent);
   -webkit-mask-composite:source-in;mask-composite:intersect}
-.side-pic.l .slide .fg{transform:translateX(-56%)}.side-pic.r .slide .fg{transform:translateX(-44%)}
+.side-pic.l .slide .fg{transform:translateX(-62%)}.side-pic.r .slide .fg{transform:translateX(-38%)}
 .side-pic.has-pics::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px);mix-blend-mode:multiply;opacity:.25}
 .side-pic .photo-tap{bottom:8%;z-index:2;opacity:0;animation:none;transition:opacity .3s}
@@ -459,13 +459,21 @@ main{background:
 
 /* 나무 심기: 스탠딩 아래 숲 */
 .grove{position:absolute;left:0;bottom:0;width:100%;height:40%;z-index:1;pointer-events:none;image-rendering:pixelated}
-.plant-btn{position:absolute;left:12px;top:30px;z-index:3000;padding:3px 7px;border:2px solid #d9f5c8;background:#16203a;color:#d9f5c8;font-family:"Galmuri9","Galmuri11",monospace;font-size:10px;cursor:pointer;box-shadow:2px 2px 0 #5aa05a;white-space:nowrap}
-.plant-btn:active{transform:translate(2px,2px);box-shadow:none}
-.plant-btn[disabled]{cursor:default;opacity:.8;box-shadow:none}
-.grove-count{position:absolute;left:14px;top:56px;z-index:2;font-family:"Galmuri9",monospace;font-size:9px;color:#9fd6a0;white-space:nowrap;pointer-events:none}
+.acts .plant-btn{background:#e4f7d6;box-shadow:2px 2px 0 #6fc25e}
+.acts .plant-btn .a-ico{font-size:10px}
+.acts .plant-btn[disabled]{cursor:default;opacity:.85;box-shadow:none;transform:none}
+.grove-count{position:absolute;left:14px;top:30px;z-index:2;font-family:"Galmuri9",monospace;font-size:9px;color:#9fd6a0;white-space:nowrap;pointer-events:none}
 .tree-tip{position:absolute;z-index:3001;padding:1px 5px;border:1px solid #1c1a33;background:#fffaf0;color:#1c1a33;font-family:"Galmuri9",monospace;font-size:9px;white-space:nowrap;transform:translate(-50%,-100%);pointer-events:none}
 .tree-tip[hidden]{display:none}
-@media (max-width:520px){.floor-hint{top:74px}}
+@media (max-width:520px){.floor-hint{top:46px}}
+
+/* 스크린 빈자리에 뜨는 응원 메시지 (양쪽 하나씩, 동시에 바뀜) */
+.scr-msg{position:absolute;z-index:3;width:max-content;max-width:8.5%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;
+  font-family:"Galmuri11","Noto Sans KR",monospace;font-size:.9cqw;line-height:1.4;color:#fff;word-break:keep-all;
+  text-shadow:0 0 .5cqw var(--light),0 0 1.2cqw var(--glow);opacity:0;transition:opacity 1s ease}
+.scr-msg.on{opacity:1}
+.scr-msg .by{display:block;margin-top:.25em;font-size:.78em;color:var(--bulb);opacity:.85}
+.narrow .scr-msg{display:none}
 
 /* 화면 맨 아래 미니 플레이어 */
 .ticker{width:min(560px,calc(100% - 28px));margin:10px auto 0}
@@ -603,6 +611,8 @@ body.has-player main{padding-bottom:90px}
 
     <div class="side-pic l" id="pic-l"><p class="led side-led"><span class="big">WELCOME HOME</span><span id="dday-led"></span></p></div>
     <div class="side-pic r" id="pic-r"><p class="led side-led"><span class="big">LOVE IS HERE</span><span>SOUL TREE</span></p></div>
+    <div class="scr-msg" id="scr-l"></div>
+    <div class="scr-msg" id="scr-r"></div>
     <div class="video-slot" id="video-slot" hidden></div>
 
     <svg class="front" viewBox="0 0 1600 760" preserveAspectRatio="none" aria-hidden="true">
@@ -622,7 +632,6 @@ body.has-player main{padding-bottom:90px}
     <span class="floor-count" id="floor-count"></span>
     <span class="floor-hint" id="floor-hint">바닥을 누르면 내 미니미가 걸어가요</span>
     <canvas class="grove" id="grove" aria-hidden="true"></canvas>
-    <button type="button" class="plant-btn" id="plant-btn">🌱 나무 심기</button>
     <span class="grove-count" id="grove-count"></span>
     <span class="tree-tip" id="tree-tip" hidden></span>
     <div class="acts" id="acts" role="group" aria-label="응원 동작">
@@ -630,6 +639,7 @@ body.has-player main{padding-bottom:90px}
       <button type="button" data-act="heart"><i class="a-ico">♥</i>하트</button>
       <button type="button" data-act="emoji" aria-expanded="false"><i class="a-ico">☺</i>이모티콘</button>
       <button type="button" data-act="clap"><i class="a-ico">✋</i>박수</button>
+      <button type="button" class="plant-btn" id="plant-btn"><i class="a-ico">🌱</i><span>나무 심기</span></button>
       <div class="emo-pick" id="emo-pick" hidden></div>
     </div>
   </div>
@@ -1280,6 +1290,15 @@ window.SITE = {
       side.box.insertBefore(el, side.box.firstChild);
       const on = () => { requestAnimationFrame(() => el.classList.add("on")); if (old) { old.classList.remove("on"); setTimeout(() => old.remove(), 1700); } };
       const fg = el.fg;
+      // 가로 사진은 너무 넓어지지 않게 (옆에 응원 메시지 자리 남김), 사진 전체는 그대로 보이게
+      const fit = () => {
+        const nw = fg.naturalWidth || fg.videoWidth, nh = fg.naturalHeight || fg.videoHeight;
+        if (!nw || !nh) return;
+        const bw = side.box.clientWidth, bh = side.box.clientHeight, maxW = bw * 0.48;
+        if ((nw / nh) * bh > maxW) { const hh = maxW / (nw / nh); fg.style.height = hh + "px"; fg.style.top = (bh - hh) / 2 + "px"; }
+      };
+      if (fg.tagName === "VIDEO") fg.addEventListener("loadedmetadata", fit, { once: true });
+      else if (fg.complete) fit(); else fg.addEventListener("load", fit, { once: true });
       if (fg.tagName === "VIDEO") fg.addEventListener("loadeddata", on, { once: true });
       else if (fg.complete) on(); else { fg.onload = on; fg.onerror = on; }
     };
@@ -1326,6 +1345,71 @@ window.SITE = {
   setInterval(nextTruss, 4500); // 문구 하나당 4.5초
   setTimeout(nextTruss, 800);
 
+
+  /* ---------- 스크린 빈자리: 응원 메시지 양쪽에 하나씩, 동시에 바뀜 ---------- */
+  const stageEl = $("#stage");
+  const scrEls = [$("#scr-l"), $("#scr-r")];
+  const ECX = 50, ECY = 470 / 760 * 100, ERX = 752 / 1600 * 100 * 0.96, ERY = 142 / 760 * 100 * 0.92;
+  // 왼쪽 트러스 다리 바깥선 (세로 위치 % → 가로 위치 %)
+  const LEG = [[30, 50], [37.6, 49], [44.8, 47.7], [51.6, 46.2], [57.9, 44.5], [63.8, 42.5], [69.3, 40.2], [74.4, 37.8], [79.1, 35], [83.3, 32.1], [87.1, 28.9]];
+  const legX = (y) => { if (y <= LEG[0][0]) return 50; for (let i = 1; i < LEG.length; i++) if (y <= LEG[i][0]) { const [y0, x0] = LEG[i - 1], [y1, x1] = LEG[i]; return x0 + (x1 - x0) * (y - y0) / (y1 - y0); } return 28; };
+  const inEllipse = (x, y) => ((x - ECX) / ERX) ** 2 + ((y - ECY) / ERY) ** 2 <= 1;
+  function placeScr(el, side) {
+    const sr = stageEl.getBoundingClientRect();
+    if (!sr.width) return false;
+    const pct = (r) => ({ l: (r.left - sr.left) / sr.width * 100, r: (r.right - sr.left) / sr.width * 100, t: (r.top - sr.top) / sr.height * 100, b: (r.bottom - sr.top) / sr.height * 100 });
+    const fg = $(`#pic-${side} .slide.on .fg`) || $(`#pic-${side} .slide .fg`);
+    const ph = fg ? pct(fg.getBoundingClientRect()) : null;
+    el.style.left = "0"; el.style.top = "0";
+    const w = el.offsetWidth / sr.width * 100, h = el.offsetHeight / sr.height * 100;
+    for (let k = 0; k < 120; k++) {
+      const x = side === "l" ? rand(4, 46) : rand(54, 96);
+      const y = rand(ECY - ERY, ECY + ERY);
+      const L = x - w / 2, R = x + w / 2, T = y - h / 2, B = y + h / 2;
+      if (![[L, T], [R, T], [L, B], [R, B]].every(([a, b]) => inEllipse(a, b))) continue;
+      if (side === "l" && R > Math.min(legX(T), legX(B)) - 1.5) continue; // 트러스 다리 피하기
+      if (side === "r" && L < 100 - Math.min(legX(T), legX(B)) + 1.5) continue;
+      if (ph && !(R < ph.l + 1.2 || L > ph.r - 1.2 || B < ph.t || T > ph.b)) continue; // 사진(흐린 가장자리 빼고) 피하기
+      el.style.left = x + "%"; el.style.top = y + "%";
+      return true;
+    }
+    return false;
+  }
+  let scrIdx = 0, lastScr = [];
+  function nextScr() {
+    if (document.hidden || narrow || !pool.length) { scrEls.forEach((e) => e.classList.remove("on")); return; }
+    scrEls.forEach((e) => e.classList.remove("on"));
+    setTimeout(() => {
+      // 왼쪽·오른쪽은 항상 서로 다른 글 (같은 문구도 겹치지 않게)
+      const uniq = [];
+      const seen = new Set();
+      for (const p of pool.slice(0, 60)) { const k = p.message.trim(); if (!seen.has(k)) { seen.add(k); uniq.push(p); } }
+      // 랜덤으로 고르되, 방금 떴던 글은 피하고 양쪽은 서로 다른 글·다른 사람으로
+      const pickOne = (avoid) => {
+        const c1 = uniq.filter((u) => !avoid.includes(u) && !lastScr.includes(u.message));
+        const c2 = c1.length ? c1 : uniq.filter((u) => !avoid.includes(u));
+        return c2.length ? c2[Math.floor(Math.random() * c2.length)] : null;
+      };
+      const picks = [];
+      const a1 = pickOne([]);
+      if (a1) picks.push(a1);
+      if (a1 && uniq.length > 1) {
+        const diffNick = uniq.filter((u) => u !== a1 && u.nickname !== a1.nickname && !lastScr.includes(u.message));
+        picks.push(diffNick.length ? diffNick[Math.floor(Math.random() * diffNick.length)] : pickOne([a1]));
+      }
+      lastScr = picks.map((p) => p.message);
+      scrEls.forEach((el, i) => {
+        const p = picks[i];
+        if (!p) return;
+        el.innerHTML = "";
+        el.append(document.createTextNode(p.message));
+        const by = document.createElement("span"); by.className = "by"; by.textContent = "— " + p.nickname; el.appendChild(by);
+        if (placeScr(el, i ? "r" : "l")) el.classList.add("on");
+      });
+    }, 900);
+  }
+  setInterval(nextScr, 5500);
+  setTimeout(nextScr, 2500);
 
   /* ---------- 스탠딩 구역: 관객 캐릭터 ---------- */
   const floor = $("#floor");
@@ -1743,8 +1827,8 @@ window.SITE = {
   }
   async function loadPool() {
     try {
-      const r = await fetch(`${API}/posts?select=nickname,message,is_anon&order=id.desc&limit=80`, { headers: HEADERS });
-      if (r.ok) pool = (await r.json()).filter((p) => !p.is_anon); // 비공개 편지는 미니미로 안 나옴
+      const r = await fetch(`${API}/posts?select=nickname,message,is_anon&kind=eq.ilchon&order=id.desc&limit=80`, { headers: HEADERS });
+      if (r.ok) pool = (await r.json()).filter((p) => !p.is_anon); // 응원 메시지만 (팬레터는 미니미·스크린에 안 나옴)
     } catch {}
     updateTicker();
     syncFans();
@@ -1840,7 +1924,7 @@ window.SITE = {
         form.reset();
         applyName();
         msg.textContent = kind === "ilchon" ? "스탠딩의 내 미니미 위에 떠올랐어요!" : anon ? "익명의 나무로 편지가 도착했어요!" : "편지가 도착했어요!";
-        if (!anon) {
+        if (kind === "ilchon") {
           pool.unshift({ nickname, message });
           updateTicker();
           myPosted(nickname, message);
@@ -2009,7 +2093,7 @@ window.SITE = {
   const plantBtn = $("#plant-btn");
   const hasPlanted = () => store.get("plantedTree") === "1";
   function updPlant() {
-    plantBtn.textContent = hasPlanted() ? "🌳 내 나무를 심었어요" : "🌱 나무 심기";
+    plantBtn.innerHTML = hasPlanted() ? '<i class="a-ico">🌳</i><span>심었어요</span>' : '<i class="a-ico">🌱</i><span>나무 심기</span>';
     plantBtn.disabled = hasPlanted();
   }
   plantBtn.addEventListener("click", async (e) => {
@@ -2018,7 +2102,7 @@ window.SITE = {
     wake();
     const x = Math.round(clamp(me.x + rand(-4, 4), 2, 98) * 10) / 10;
     const y = Math.round(rand(10, 95) * 10) / 10;
-    plantBtn.disabled = true; plantBtn.textContent = "심는 중…";
+    plantBtn.disabled = true; $("span", plantBtn).textContent = "심는 중…";
     try {
       await rpc("plant_tree", { p_nickname: guestName, p_x: x, p_y: y });
       store.set("plantedTree", "1");
@@ -2026,7 +2110,7 @@ window.SITE = {
       fx(me, "🌱", 0, 0);
       push({ t: "tree", x, y });
     } catch (err) {
-      plantBtn.textContent = /too soon/.test(String(err)) ? "조금 뒤에 다시 심어 주세요" : "다시 눌러 주세요";
+      $("span", plantBtn).textContent = /too soon/.test(String(err)) ? "조금 뒤에" : "다시 눌러요";
       setTimeout(updPlant, 2500);
       return;
     }
