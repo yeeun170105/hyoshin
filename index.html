@@ -20,10 +20,11 @@ body.theme-blue{--light:#4d8dff;--light-2:#8a63ff;--rim:#6f9cff;--bulb:#dce8ff;-
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR",system-ui,sans-serif;line-height:1.6;overflow-x:hidden}
 body.locked{overflow:hidden}
+body.locked .acts,body.locked .under{visibility:hidden}
 button,input,textarea{font:inherit;color:inherit}
 
 /* ---------- 입장 티켓 ---------- */
-.gate{position:fixed;inset:0;z-index:50;display:grid;place-items:center;align-content:center;gap:16px;padding:20px;overflow-y:auto;
+.gate{position:fixed;inset:0;z-index:9000;display:grid;place-items:center;align-content:center;gap:16px;padding:20px;overflow-y:auto;
   background:radial-gradient(ellipse at 50% 30%,rgba(70,20,90,.75),rgba(6,3,12,.97) 70%);backdrop-filter:blur(5px);transition:opacity .7s var(--ease),visibility .7s}
 .gate.hide{opacity:0;visibility:hidden}
 .px-gate{padding-bottom:min(20vh,160px);background:linear-gradient(#b9a3dc 0%,#d9c3e8 38%,#f4dccb 72%,#e9d6b4 100%);color:#3b2f2a;gap:12px;backdrop-filter:none;font-family:"Galmuri11","Galmuri9",monospace;overflow:hidden}
@@ -122,7 +123,7 @@ body.theme-pink .meriel circle{fill:#f0b8ff}
 .lightbox{position:fixed;inset:0;z-index:6000;display:grid;place-items:center;background:rgba(10,8,24,.92);padding:16px;cursor:zoom-out;opacity:0;transition:opacity .3s}
 .lightbox.show{opacity:1}
 .lightbox[hidden]{display:none}
-.lightbox img{max-width:100%;max-height:calc(100% - 40px);object-fit:contain;border:3px solid #fffaf0;box-shadow:0 0 0 3px #1c1a33,0 0 40px var(--light)}
+.lightbox video,.lightbox img{max-width:100%;max-height:calc(100% - 40px);object-fit:contain;border:3px solid #fffaf0;box-shadow:0 0 0 3px #1c1a33,0 0 40px var(--light)}
 .lightbox p{margin-top:10px;font-family:Galmuri9,monospace;font-size:11px;color:#c5a3ff;text-align:center}
 .photo-empty{position:absolute;inset:0;display:grid;place-content:end center;padding-bottom:9%;text-align:center}
 .photo-empty .brush{font-family:"Nanum Brush Script",cursive;color:#fff;font-size:3.1cqw;line-height:.95;text-shadow:0 0 1.2cqw var(--light)}
@@ -241,10 +242,10 @@ main{position:relative;z-index:2}
 @keyframes stepA{0%,100%{transform:rotate(14deg)}50%{transform:rotate(-14deg)}}
 @keyframes stepB{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(14deg)}}
 @keyframes wave{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(10deg)}}
-.fan .name{position:absolute;left:50%;top:-13px;transform:translateX(-50%);white-space:nowrap;font-size:10px;font-weight:700;color:#fff;background:rgba(0,0,0,.45);padding:0 6px;border-radius:6px;pointer-events:none}
+.fan .name{position:absolute;left:50%;top:calc(100% + 1px);line-height:1.35;transform:translateX(-50%);white-space:nowrap;font-size:10px;font-weight:700;color:#fff;background:rgba(0,0,0,.45);padding:0 6px;border-radius:6px;pointer-events:none}
 .fan.new{animation:arrive .8s var(--ease)}
 @keyframes arrive{from{opacity:0;transform:translateY(-30px) scale(.6)}}
-.bubble{position:absolute;bottom:calc(100% + 17px);left:50%;transform:translateX(-50%);width:max-content;max-width:190px;padding:7px 11px;border-radius:12px;background:#fff;color:#1a0f2e;font-size:12px;font-weight:700;line-height:1.4;text-align:left;white-space:normal;word-break:keep-all;overflow-wrap:anywhere;box-shadow:0 4px 18px rgba(0,0,0,.35),0 0 14px var(--glow);pointer-events:none;animation:popin .3s var(--ease)}
+.bubble{position:absolute;bottom:calc(100% + 12px);left:50%;transform:translateX(-50%);width:max-content;max-width:150px;padding:5px 9px;border-radius:12px;background:#fff;color:#1a0f2e;font-size:12px;font-weight:700;line-height:1.4;text-align:left;white-space:normal;word-break:keep-all;overflow-wrap:anywhere;box-shadow:0 4px 18px rgba(0,0,0,.35),0 0 14px var(--glow);pointer-events:none;animation:popin .3s var(--ease)}
 .fan.edge-l .bubble{left:0;transform:none}.fan.edge-l .bubble::after{left:14px}
 .fan.edge-r .bubble{left:auto;right:0;transform:none}.fan.edge-r .bubble::after{left:auto;right:10px}
 .bubble::after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-bottom:0;border-top-color:#fff}
@@ -359,20 +360,27 @@ main{background:
 
 
 /* 양쪽 스크린 사진 */
-.side-pic{position:absolute;z-index:3;top:46%;width:13.5%;height:29%;display:grid;place-items:center;text-align:center;border-radius:.6cqw;overflow:hidden}
-.side-pic.l{left:17%}.side-pic.r{left:69.5%}
-.side-pic.has-pics{cursor:zoom-in;box-shadow:0 0 0 .18cqw rgba(255,255,255,.55),0 0 2cqw var(--glow);background:#000}
-.side-pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 15%;opacity:0;transition:opacity 1.4s var(--ease)}
-.side-pic img.on{opacity:1}
-.side-pic .photo-tap{bottom:5%}
+.side-pic{position:absolute;z-index:3;top:39%;width:31%;height:44%;display:grid;place-items:center;text-align:center;overflow:hidden;
+  -webkit-mask-image:radial-gradient(50% 50% at 50% 50%,#000 38%,rgba(0,0,0,.6) 58%,transparent 76%);mask-image:radial-gradient(50% 50% at 50% 50%,#000 38%,rgba(0,0,0,.6) 58%,transparent 76%)}
+.side-pic.l{left:6%}.side-pic.r{left:63%}
+.side-pic.has-pics{cursor:zoom-in}
+.side-pic img,.side-pic video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 22%;opacity:0;transition:opacity 1.6s var(--ease);
+  mix-blend-mode:screen;filter:saturate(.85) contrast(1.08) brightness(1.05)}
+.side-pic img.on,.side-pic video.on{opacity:.92}
+.side-pic.has-pics::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px),radial-gradient(60% 60% at 50% 50%,transparent 40%,var(--glow) 100%);mix-blend-mode:multiply;opacity:.7}
+.side-pic .photo-tap{bottom:22%;z-index:2;opacity:0;animation:none;transition:opacity .3s}
+.side-pic:hover .photo-tap{opacity:1}
 .side-led{font-size:1.3cqw;line-height:1.5}
 .side-led .big{display:block;font-size:1.7cqw}
 .side-led span:not(.big){display:block;font-size:1cqw;letter-spacing:.2em;opacity:.85}
 .narrow .photo-tap{display:none}
 /* 트러스 가운데 응원 메시지 */
-.truss-msg{position:absolute;left:22%;right:22%;bottom:3.5%;text-align:center;font-family:"Galmuri11","Noto Sans KR",monospace;color:#fff;
-  font-size:1.15cqw;line-height:1.45;word-break:keep-all;text-shadow:0 0 .6cqw var(--light),0 0 1.4cqw var(--glow);opacity:0;transform:translateY(.5cqw);transition:opacity .8s,transform .8s}
+.truss-msg{position:absolute;left:21%;right:21%;bottom:3%;text-align:center;font-family:"Galmuri11","Noto Sans KR",monospace;color:#fff;
+  font-size:1.9cqw;line-height:1.35;word-break:keep-all;text-shadow:0 0 .6cqw var(--light),0 0 1.4cqw var(--glow);opacity:0;transform:translateY(1.2cqw);transition:opacity .8s,transform .8s}
 .truss-msg.on{opacity:1;transform:none}
+.narrow .truss-msg{font-size:2.2cqw;left:22%;right:22%}
+.truss-msg.out{opacity:0;transform:translateY(-1.2cqw)}
 .truss-msg .who{display:block;margin-top:.4em;font-size:.72em;color:var(--bulb);letter-spacing:.1em}
 .photo.has-msg .photo-empty{display:none}
 .photo::after{content:"";position:absolute;inset:0;background:radial-gradient(70% 60% at 50% 80%,rgba(255,255,255,.08),transparent 70%);pointer-events:none}
@@ -380,7 +388,7 @@ main{background:
 .floor{cursor:pointer}
 .floor-hint{position:absolute;left:50%;top:30px;transform:translateX(-50%);font-family:"Galmuri9",monospace;font-size:10px;color:#9d8cc9;white-space:nowrap;z-index:1;pointer-events:none}
 .fan.me .name{background:#ffd86b;color:#1c1a33}
-.fan.me .name::before{content:"▼";position:absolute;left:50%;top:-11px;transform:translateX(-50%);font-size:8px;color:#ffd86b;animation:tapblink 1.2s infinite}
+.fan.me::before{content:"▼";position:absolute;left:50%;top:-10px;transform:translateX(-50%);font-size:8px;color:#ffd86b;animation:tapblink 1.2s infinite;pointer-events:none}
 .fan.live .name::after{content:"";display:inline-block;width:5px;height:5px;margin-left:4px;vertical-align:1px;background:#6dffa8;box-shadow:0 0 4px #6dffa8}
 .fan.me .name::after{display:none}
 .acts{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);z-index:3000;display:flex;gap:6px;cursor:default}
@@ -444,7 +452,7 @@ body.has-player .footer{padding-bottom:calc(min(30vw,170px) + 64px)!important}
 .more{font-size:12px;padding:8px 18px}
 .floor-label{font-size:10px}.floor-count{font-size:11px}
 .fan .name{font-size:8px}
-.bubble{font-size:11px}
+.bubble{font-size:10px}
 .footer{font-size:11px}
 .ticker span{font-size:12px}
 
@@ -490,7 +498,7 @@ body.has-player main{padding-bottom:90px}
   <p class="px-hint" id="open-hint">▶ 봉투를 눌러 주세요</p>
   <form class="name-form" id="name-form" autocomplete="off">
     <label for="guest-name">NAME</label>
-    <input id="guest-name" maxlength="20" placeholder="이름을 적어 주세요" required />
+    <input id="guest-name" maxlength="5" placeholder="이름 (5자까지)" required />
     <button type="button" id="enter-btn" class="enter-btn">입장 ▶</button>
   </form>
   <p class="gate-note">팬이 만든 공간입니다. 아티스트·소속사의 공식 서비스가 아닙니다.</p>
@@ -661,7 +669,13 @@ window.SITE = {
   // 입장하면 왼쪽 스크린에서 흘러나오는 첫 노래
   bgm: { title: "HOME", url: "https://www.youtube.com/watch?v=iJYYqKi5J6c" },
   // 가운데 트러스 안 사진: 예) ["photos/01.jpg", "photos/02.jpg"]
+  // 양쪽 스크린: 사진(.jpg/.png)이나 짧은 영상(.mp4, 소리 없이 반복)
   photos: ["photos/01.jpg"],
+  // 무대 가운데 문구 (번갈아 떠요). 생일 당일(12/1)에는 birthday 문구가 떠요
+  stageText: {
+    normal: ["사랑이 여기에 있어", "우리집에서 기다릴게", "언제나 넌 나의 최고였지"],
+    birthday: ["HAPPY BIRTHDAY", "생일 축하해요, 효신", "WELCOME HOME"],
+  },
   // 셋리스트: url이 비어 있으면 "영상 준비 중"
   setlist: [
     { title: "Happy Together", url: "https://www.youtube.com/watch?v=yyb0QuHuIOU" },
@@ -1052,7 +1066,7 @@ window.SITE = {
 
   /* ---------- 입장 (이름 적기) ---------- */
   const gate = $("#ticket-gate"), nameInput = $("#guest-name"), nameForm = $("#name-form");
-  let guestName = (store.get("guestName") || "").trim();
+  let guestName = [...(store.get("guestName") || "").trim()].slice(0, 5).join("");
   function applyName() {
     $$(".me-name").forEach((el) => (el.textContent = guestName));
     $$('.post-form input[name="nickname"]').forEach((el) => (el.value = guestName));
@@ -1069,7 +1083,7 @@ window.SITE = {
       nameInput.focus();
       return;
     }
-    guestName = v.slice(0, 20);
+    guestName = [...v].slice(0, 5).join("");
     store.set("guestName", guestName);
     applyName();
     gate.classList.add("hide");
@@ -1135,7 +1149,12 @@ window.SITE = {
     const sides = [$("#pic-l"), $("#pic-r")].map((box, k) => {
       box.innerHTML = "";
       box.classList.add("has-pics");
-      const imgs = S.photos.map((src) => { const img = new Image(); img.src = src; img.alt = ""; box.appendChild(img); return img; });
+      const imgs = S.photos.map((src) => {
+        let el;
+        if (/\.(mp4|webm|mov)$/i.test(src)) { el = document.createElement("video"); el.muted = true; el.loop = true; el.autoplay = true; el.playsInline = true; el.setAttribute("playsinline", ""); el.preload = "metadata"; }
+        else { el = new Image(); el.alt = ""; }
+        el.src = src; box.appendChild(el); return el;
+      });
       const tap = document.createElement("span");
       tap.className = "photo-tap"; tap.textContent = "▶ 크게 보기";
       box.appendChild(tap);
@@ -1143,13 +1162,18 @@ window.SITE = {
       const side = { imgs, i: S.photos.length > 1 ? k % S.photos.length : 0 };
       imgs[side.i].classList.add("on");
       box.addEventListener("click", () => {
-        $("img", lb).src = imgs[side.i].src;
+        const cur = imgs[side.i], holder = $("div", lb);
+        $$("img,video", holder).forEach((x) => x.remove());
+        let big;
+        if (cur.tagName === "VIDEO") { big = document.createElement("video"); big.src = cur.src; big.controls = true; big.autoplay = true; big.loop = true; big.playsInline = true; }
+        else { big = new Image(); big.src = cur.src; big.alt = ""; }
+        holder.prepend(big);
         lb.hidden = false;
         requestAnimationFrame(() => lb.classList.add("show"));
       });
       return side;
     });
-    lb.addEventListener("click", () => { lb.classList.remove("show"); setTimeout(() => { lb.hidden = true; }, 300); });
+    lb.addEventListener("click", (e) => { if (e.target.tagName === "VIDEO") return; lb.classList.remove("show"); setTimeout(() => { lb.hidden = true; $$("video", lb).forEach((v) => v.pause()); }, 300); });
     if (S.photos.length > 1) {
       let turn = 0;
       setInterval(() => {
@@ -1168,20 +1192,27 @@ window.SITE = {
   const trussBox = $("#photo"), trussMsg = $("#truss-msg");
   let trussIdx = 0;
   function showTruss(text, who) {
-    trussMsg.classList.remove("on");
+    trussMsg.classList.add("out");
     setTimeout(() => {
-      trussMsg.textContent = text.length > 30 ? text.slice(0, 29) + "…" : text;
+      trussMsg.style.transition = "none";
+      trussMsg.classList.remove("on", "out");
+      void trussMsg.offsetWidth;
+      trussMsg.style.transition = "";
+      const lim = 30;
+      trussMsg.textContent = text.length > lim ? text.slice(0, lim - 1) + "…" : text;
       if (who) { const w = document.createElement("span"); w.className = "who"; w.textContent = "— " + who; trussMsg.appendChild(w); }
       trussBox.classList.add("has-msg");
       trussMsg.classList.add("on");
-    }, 500);
+    }, 700);
   }
   function nextTruss() {
     if (document.hidden) return;
-    if (pool.length) { const p = pool[trussIdx++ % Math.min(pool.length, 40)]; showTruss(p.message, p.nickname); }
-    else showTruss(fallback[trussIdx++ % fallback.length]);
+    const T = S.stageText || {};
+    const isBday = ddayText() === "HAPPY DAY";
+    const list = (isBday ? T.birthday : T.normal) || fallback;
+    showTruss(list[trussIdx++ % list.length]);
   }
-  setInterval(nextTruss, 5000);
+  setInterval(nextTruss, 4500); // 문구 하나당 4.5초
   setTimeout(nextTruss, 800);
 
 
@@ -1326,7 +1357,7 @@ window.SITE = {
 
   const rand = (a, b) => a + Math.random() * (b - a);
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-  const Y_MIN = 30, Y_MAX = 78;
+  const Y_MIN = 30, Y_MAX = 72;
   // key: 'me' | 'live:<id>' | 'npc:<닉네임>'
   function addFan(key, nick, msgs, opt = {}) {
     if (fans.has(key)) { const f = fans.get(key); msgs.forEach((m) => { if (!f.msgs.includes(m)) f.msgs.unshift(m); }); return f; }
@@ -1335,11 +1366,11 @@ window.SITE = {
     el.className = "fan" + (opt.isNew ? " new" : "") + (opt.me ? " me" : "") + (opt.live ? " live" : "");
     el.setAttribute("aria-label", `${nick}${opt.me ? "(나)" : ""}`);
     el.innerHTML = fanSprite(hash(nick)) + `<span class="name"></span>`;
-    $(".name", el).textContent = nick;
+    $(".name", el).textContent = [...nick].slice(0, 5).join("");
     const f = { key, el, nick, msgs: [...msgs], me: !!opt.me, live: !!opt.live,
       x: opt.x ?? rand(8, 92), y: opt.y ?? rand(Y_MIN, Y_MAX), wait: rand(0, 2) };
     f.tx = f.x; f.ty = f.y;
-    el.addEventListener("click", (e) => { e.stopPropagation(); doAct(f, "clap"); });
+    el.addEventListener("click", (e) => { e.stopPropagation(); if (f.msgs.length) say(f, true); else doAct(f, "clap"); });
     floor.appendChild(el);
     fans.set(key, f);
     place(f);
@@ -1349,7 +1380,7 @@ window.SITE = {
   function setName(f, nick) {
     if (f.nick === nick) return;
     f.nick = nick;
-    $(".name", f.el).textContent = nick;
+    $(".name", f.el).textContent = [...nick].slice(0, 5).join("");
     const s = sprites(hash(nick));
     const [i0, ia, ib] = $$(".sprite img", f.el);
     i0.src = s.idle; ia.src = s.a; ib.src = s.b;
@@ -1402,6 +1433,12 @@ window.SITE = {
     requestAnimationFrame(walk);
   }
   requestAnimationFrame(walk);
+  // 응원을 남긴 미니미 위에 말풍선이 번갈아 뜬다
+  setInterval(() => {
+    if (document.hidden) return;
+    const list = [...fans.values()].filter((f) => f.msgs.length && !$(".bubble", f.el));
+    if (list.length) say(list[Math.floor(Math.random() * list.length)]);
+  }, 2600);
 
   /* ---------- 동작 효과 ---------- */
   const HEART_G = [".pp.pp.", "pwppppp", "ppppppp", ".ppppp.", "..ppp..", "...p..."];
@@ -1449,7 +1486,7 @@ window.SITE = {
   }
   function myPosted(nick, message) {
     ensureMe();
-    
+    if (me) { me.msgs.unshift(message); say(me, true, message); }
     push({ t: "say", m: message.slice(0, 60) });
   }
   function push(ev) {
@@ -1465,11 +1502,11 @@ window.SITE = {
   function onEv({ id, n, q }) {
     const f = fans.get("live:" + id);
     if (!f || !Array.isArray(q)) return;
-    if (typeof n === "string" && n) setName(f, n.slice(0, 20));
+    if (typeof n === "string" && n) setName(f, [...n].slice(0, 5).join(""));
     q.slice(0, 6).forEach((ev, k) => setTimeout(() => {
       if (ev.t === "mv") { f.tx = clamp(+ev.x || 50, 4, 96); f.ty = clamp(+ev.y || 50, Y_MIN, Y_MAX); f.wait = 0; }
       else if (ev.t === "act") doAct(f, ev.a, ev.e);
-      else if (ev.t === "say" && typeof ev.m === "string") { pool.unshift({ nickname: f.nick, message: ev.m }); showTruss(ev.m, f.nick); }
+      else if (ev.t === "say" && typeof ev.m === "string") { pool.unshift({ nickname: f.nick, message: ev.m }); f.msgs.unshift(ev.m); say(f, true, ev.m); }
     }, k * 400));
   }
   function onSync() {
@@ -1478,7 +1515,7 @@ window.SITE = {
     for (const [id, metas] of Object.entries(st)) {
       if (id === myId) continue;
       const m = metas[metas.length - 1] || {};
-      const nick = String(m.n || "팬").slice(0, 20);
+      const nick = [...String(m.n || "팬")].slice(0, 5).join("");
       seen.add("live:" + id);
       const msgs = pool.filter((p) => p.nickname === nick).map((p) => p.message).slice(0, 5);
       const f = fans.get("live:" + id) || addFan("live:" + id, nick, msgs, { live: true, isNew: true, x: clamp(+m.x || 50, 4, 96), y: clamp(+m.y || 60, Y_MIN, Y_MAX) });
@@ -1686,9 +1723,8 @@ window.SITE = {
         store.set("lastPost", String(Date.now()));
         form.reset();
         applyName();
-        msg.textContent = kind === "ilchon" ? "무대 가운데 트러스에 떠올랐어요!" : "편지가 도착했어요!";
+        msg.textContent = kind === "ilchon" ? "스탠딩의 내 미니미 위에 떠올랐어요!" : "편지가 도착했어요!";
         pool.unshift({ nickname, message });
-        showTruss(message, nickname);
         updateTicker();
         myPosted(nickname, message);
         syncFans();
