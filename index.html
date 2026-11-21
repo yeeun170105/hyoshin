@@ -428,6 +428,24 @@ main{background:
 @keyframes ring{from{opacity:1;transform:translate(-50%,-50%) scale(.5)}to{opacity:0;transform:translate(-50%,-50%) scale(5)}}
 @media (max-width:520px){.acts{gap:4px}.acts button{padding:4px 6px;font-size:10px}.floor-hint{top:28px;font-size:9px}}
 
+/* 비공개 체크, 내가 쓴 글 */
+.anon-check{display:flex;align-items:center;gap:6px;font-family:"Galmuri11",monospace;font-size:12px;color:#3b2f2a;cursor:pointer;user-select:none}
+.anon-check input{width:14px;height:14px;margin:0;accent-color:#5b3fa0;box-shadow:none}
+.anon-check small{color:#9b8fb8;font-size:10px}
+.post-form .my-link,.my-link{justify-self:start;padding:0;border:0;background:none;box-shadow:none;color:#9b6be0;font-family:"Galmuri9","Galmuri11",monospace;font-size:11px;font-weight:400;text-decoration:underline;cursor:pointer}
+.post-form .my-link:active{transform:none}
+.my-box{margin-top:26px;padding-top:18px;border-top:2px dashed #c5a3ff}
+.my-title{margin:0 0 4px;font-family:"Galmuri11",monospace;font-weight:700;font-size:13px;color:#5b3fa0}
+.my-title small{font-weight:400;font-size:10px;color:#9b8fb8;margin-left:4px}
+.my-desc{margin:0 0 10px;font-family:"Galmuri9",monospace;font-size:10.5px;line-height:1.6;color:#8a80a8}
+.my-form{margin-bottom:12px}
+.my-list .tag{display:inline-block;margin-right:6px;padding:0 5px;font-family:"Galmuri9",monospace;font-size:10px;color:#fff;background:#9b6be0}
+.my-list .tag.anon{background:#7c7aa0}
+.my-list .acts-row{display:flex;gap:10px;margin-top:8px}
+.my-list .acts-row button{padding:0;border:0;background:none;color:#9b6be0;font-family:"Galmuri9",monospace;font-size:11px;text-decoration:underline;cursor:pointer}
+.my-list textarea{width:100%;margin-top:8px;padding:8px 10px;border:3px solid #1c1a33;font-family:"Galmuri11","Noto Sans KR",monospace;font-size:13px;resize:vertical}
+.letters .edited{margin-left:6px;font-size:10px;color:#a99fc0;font-family:"Galmuri9",monospace}
+
 /* 화면 맨 아래 미니 플레이어 */
 .ticker{width:min(560px,calc(100% - 28px));margin:10px auto 0}
 .under{position:fixed;left:0;right:0;bottom:0;z-index:5000;width:100%;margin:0;padding:8px 12px calc(8px + env(safe-area-inset-bottom));
@@ -622,11 +640,12 @@ body.has-player main{padding-bottom:90px}
       <p class="me-line"><b class="me-name"></b> 이름으로 남겨요<button type="button" class="rename">이름 바꾸기</button></p>
       <input type="hidden" name="nickname" />
       <div class="row single">
-        <input name="password" type="password" maxlength="30" minlength="4" placeholder="비밀번호 (삭제용, 4자 이상)" required />
+        <input name="password" type="password" maxlength="30" minlength="4" placeholder="비밀번호 (수정·삭제용, 4자 이상)" required />
       </div>
       <input name="message" maxlength="40" placeholder="한 줄 응원 (40자까지)" required />
       <button type="submit">무대에 띄우기</button>
       <p class="form-msg" role="status"></p>
+      <button type="button" class="my-link" data-go-my>✎ 내가 쓴 글 수정·삭제하기</button>
     </form>
     <ul class="slogans" id="slogans"></ul>
     <button class="more" data-more="ilchon" hidden>더 보기</button>
@@ -644,14 +663,29 @@ body.has-player main{padding-bottom:90px}
       <p class="me-line"><b class="me-name"></b> 이름으로 남겨요<button type="button" class="rename">이름 바꾸기</button></p>
       <input type="hidden" name="nickname" />
       <div class="row single">
-        <input name="password" type="password" maxlength="30" minlength="4" placeholder="비밀번호 (삭제용, 4자 이상)" required />
+        <input name="password" type="password" maxlength="30" minlength="4" placeholder="비밀번호 (수정·삭제용, 4자 이상)" required />
       </div>
       <textarea name="message" maxlength="2000" rows="5" placeholder="편지를 적어 주세요 (2000자까지)" required></textarea>
+      <label class="anon-check"><input type="checkbox" name="anon"> 닉네임 비공개 <small>(‘익명의 나무’로 보여요)</small></label>
       <button type="submit">편지 보내기</button>
       <p class="form-msg" role="status"></p>
     </form>
     <ul class="letters" id="letters"></ul>
     <button class="more" data-more="guestbook" hidden>더 보기</button>
+
+    <div class="my-box" id="my-box">
+      <p class="my-title">✎ 내가 쓴 글 <small>수정·삭제</small></p>
+      <p class="my-desc">글을 쓸 때 쓴 닉네임과 비밀번호를 넣으면 내 응원 메시지와 편지가 모두 나와요. 비공개로 쓴 편지도 여기서 찾을 수 있어요.</p>
+      <form class="post-form my-form" id="my-form" autocomplete="off">
+        <div class="row">
+          <input name="nick" maxlength="5" placeholder="닉네임" required />
+          <input name="password" type="password" maxlength="30" placeholder="비밀번호" required />
+        </div>
+        <button type="submit">내 글 찾기</button>
+        <p class="form-msg" role="status"></p>
+      </form>
+      <ul class="letters my-list" id="my-list"></ul>
+    </div>
         </div>
     </section>
 
@@ -1407,14 +1441,14 @@ window.SITE = {
   const Y_MIN = 30, Y_MAX = 72;
   // key: 'me' | 'live:<id>' | 'npc:<닉네임>'
   function addFan(key, nick, msgs, opt = {}) {
-    if (fans.has(key)) { const f = fans.get(key); msgs.forEach((m) => { if (!f.msgs.includes(m)) f.msgs.unshift(m); }); return f; }
+    if (fans.has(key)) { const f = fans.get(key); if (msgs.length) f.msgs = [msgs[0]]; return f; } // 가장 최근 글 하나만
     const el = document.createElement("button");
     el.type = "button";
     el.className = "fan" + (opt.isNew ? " new" : "") + (opt.me ? " me" : "") + (opt.live ? " live" : "");
     el.setAttribute("aria-label", `${nick}${opt.me ? "(나)" : ""}`);
     el.innerHTML = fanSprite(hash(nick)) + `<span class="name"></span>`;
     $(".name", el).textContent = [...nick].slice(0, 5).join("");
-    const f = { key, el, nick, msgs: [...msgs], me: !!opt.me, live: !!opt.live,
+    const f = { key, el, nick, msgs: msgs.slice(0, 1), me: !!opt.me, live: !!opt.live,
       x: opt.x ?? rand(8, 92), y: opt.y ?? rand(Y_MIN, Y_MAX), wait: rand(0, 2) };
     f.tx = f.x; f.ty = f.y;
     el.addEventListener("click", (e) => { e.stopPropagation(); if (f.msgs.length) say(f, true); else doAct(f, "clap"); });
@@ -1490,7 +1524,7 @@ window.SITE = {
   /* ---------- 동작 효과 ---------- */
   const HEART_G = [".pp.pp.", "pwppppp", "ppppppp", ".ppppp.", "..ppp..", "...p..."];
   const HEART_PX = pxImg(7, 6, (x, y) => (HEART_G[y][x] === "." ? null : HEART_G[y][x]), { p: "#ff5c9e", w: "#ffd1e4" });
-  const EMOJIS = ["🥳", "🥹", "😍", "🎉", "💜", "🌳", "🏠", "✨"];
+  const EMOJIS = ["💚", "🎉", "🏠", "🌳"];
   function fx(f, html, dx, delay) {
     setTimeout(() => {
       const e = document.createElement("span");
@@ -1527,13 +1561,13 @@ window.SITE = {
     if (!guestName) return null;
     if (!me) {
       removeFan("npc:" + guestName);
-      me = addFan("me", guestName, pool.filter((p) => p.nickname === guestName).map((p) => p.message).slice(0, 5), { me: true, isNew: true, x: rand(30, 70), y: rand(55, Y_MAX) });
+      me = addFan("me", guestName, pool.filter((p) => p.nickname === guestName).map((p) => p.message).slice(0, 1), { me: true, isNew: true, x: rand(30, 70), y: rand(55, Y_MAX) });
     } else setName(me, guestName);
     return me;
   }
   function myPosted(nick, message) {
     ensureMe();
-    if (me) { me.msgs.unshift(message); say(me, true, message); }
+    if (me) { me.msgs = [message]; say(me, true, message); }
     push({ t: "say", m: message.slice(0, 60) });
   }
   function push(ev) {
@@ -1553,7 +1587,7 @@ window.SITE = {
     q.slice(0, 6).forEach((ev, k) => setTimeout(() => {
       if (ev.t === "mv") { f.tx = clamp(+ev.x || 50, 4, 96); f.ty = clamp(+ev.y || 50, Y_MIN, Y_MAX); f.wait = 0; }
       else if (ev.t === "act") doAct(f, ev.a, ev.e);
-      else if (ev.t === "say" && typeof ev.m === "string") { pool.unshift({ nickname: f.nick, message: ev.m }); f.msgs.unshift(ev.m); say(f, true, ev.m); }
+      else if (ev.t === "say" && typeof ev.m === "string") { pool.unshift({ nickname: f.nick, message: ev.m }); f.msgs = [ev.m]; say(f, true, ev.m); }
     }, k * 400));
   }
   function onSync() {
@@ -1564,7 +1598,7 @@ window.SITE = {
       const m = metas[metas.length - 1] || {};
       const nick = [...String(m.n || "팬")].slice(0, 5).join("");
       seen.add("live:" + id);
-      const msgs = pool.filter((p) => p.nickname === nick).map((p) => p.message).slice(0, 5);
+      const msgs = pool.filter((p) => p.nickname === nick).map((p) => p.message).slice(0, 1);
       const f = fans.get("live:" + id) || addFan("live:" + id, nick, msgs, { live: true, isNew: true, x: clamp(+m.x || 50, 4, 96), y: clamp(+m.y || 60, Y_MIN, Y_MAX) });
       setName(f, nick);
       removeFan("npc:" + nick);
@@ -1660,12 +1694,12 @@ window.SITE = {
       if (liveNames.has(p.nickname)) continue;
       if (!byNick.has(p.nickname)) { if (byNick.size >= limit - liveNames.size) continue; byNick.set(p.nickname, []); }
       const arr = byNick.get(p.nickname);
-      if (arr.length < 5) arr.push(p.message);
+      if (arr.length < 1) arr.push(p.message);
     }
     for (const [nick, msgs] of byNick) addFan("npc:" + nick, nick, msgs);
     for (const f of [...fans.values()]) if (!f.me && !f.live) {
       if (me && f.nick === me.nick) removeFan(f.key);
-      else if (me) { const mm = pool.filter((p) => p.nickname === me.nick).map((p) => p.message); mm.forEach((m) => { if (!me.msgs.includes(m)) me.msgs.push(m); }); }
+      else if (me) { const mm = pool.find((p) => p.nickname === me.nick); if (mm) me.msgs = [mm.message]; }
     }
     updateCount();
   }
@@ -1676,8 +1710,8 @@ window.SITE = {
   }
   async function loadPool() {
     try {
-      const r = await fetch(`${API}/posts?select=nickname,message&order=id.desc&limit=80`, { headers: HEADERS });
-      if (r.ok) pool = await r.json();
+      const r = await fetch(`${API}/posts?select=nickname,message,is_anon&order=id.desc&limit=80`, { headers: HEADERS });
+      if (r.ok) pool = (await r.json()).filter((p) => !p.is_anon); // 비공개 편지는 미니미로 안 나옴
     } catch {}
     updateTicker();
     syncFans();
@@ -1690,7 +1724,7 @@ window.SITE = {
   async function load(kind, reset) {
     const st = state[kind];
     if (reset) { st.offset = 0; st.el.innerHTML = ""; }
-    const url = `${API}/posts?select=id,nickname,message,created_at&kind=eq.${kind}&order=id.desc&limit=${PAGE}&offset=${st.offset}`;
+    const url = `${API}/posts?select=id,nickname,message,created_at,updated_at&kind=eq.${kind}&order=id.desc&limit=${PAGE}&offset=${st.offset}`;
     try {
       const res = await fetch(url, { headers: { ...HEADERS, Prefer: "count=exact" } });
       if (!res.ok) throw new Error(res.status);
@@ -1716,6 +1750,7 @@ window.SITE = {
       li.innerHTML = `<div class="head"><span class="who"></span><span class="when"></span></div><p class="msg"></p><button class="del" type="button">삭제</button>`;
       $(".who", li).textContent = r.nickname;
       $(".when", li).textContent = fmt(r.created_at);
+      if (r.updated_at) { const e = document.createElement("span"); e.className = "edited"; e.textContent = "(수정됨)"; $(".when", li).appendChild(e); }
       $(".msg", li).textContent = r.message;
     }
     $(".del", li).addEventListener("click", () => askDelete(kind, li, r.id));
@@ -1750,7 +1785,7 @@ window.SITE = {
     return res.json();
   }
 
-  $$(".post-form").forEach((form) => {
+  $$(".post-form[data-kind]").forEach((form) => {
     const kind = form.dataset.kind;
     const msg = $(".form-msg", form);
     form.addEventListener("submit", async (e) => {
@@ -1760,27 +1795,102 @@ window.SITE = {
       const nickname = (guestName || String(fd.get("nickname"))).trim();
       const message = String(fd.get("message")).trim();
       const password = String(fd.get("password"));
+      const anon = kind === "guestbook" && fd.get("anon") === "on";
       if (!nickname) { $(".rename", form).click(); return; }
       if (!message) { msg.textContent = "내용을 적어 주세요."; return; }
       if (password.length < 4) { msg.textContent = "비밀번호는 4자 이상이어야 해요."; return; }
       const btn = $("button[type=submit]", form);
       btn.disabled = true; msg.textContent = "올리는 중…";
       try {
-        await rpc("add_post", { p_kind: kind, p_nickname: nickname, p_ilchon_name: null, p_message: message, p_password: password });
+        await rpc("add_post", { p_kind: kind, p_nickname: nickname, p_ilchon_name: null, p_message: message, p_password: password, p_anon: anon });
         store.set("lastPost", String(Date.now()));
         form.reset();
         applyName();
-        msg.textContent = kind === "ilchon" ? "스탠딩의 내 미니미 위에 떠올랐어요!" : "편지가 도착했어요!";
-        pool.unshift({ nickname, message });
-        updateTicker();
-        myPosted(nickname, message);
-        syncFans();
+        msg.textContent = kind === "ilchon" ? "스탠딩의 내 미니미 위에 떠올랐어요!" : anon ? "익명의 나무로 편지가 도착했어요!" : "편지가 도착했어요!";
+        if (!anon) {
+          pool.unshift({ nickname, message });
+          updateTicker();
+          myPosted(nickname, message);
+          syncFans();
+        }
         load(kind, true);
       } catch {
         msg.textContent = "올리지 못했어요. 잠시 후 다시 시도해 주세요.";
       } finally { btn.disabled = false; }
     });
   });
+  /* ---------- 내가 쓴 글: 찾기 / 수정 / 삭제 ---------- */
+  const myForm = $("#my-form"), myList = $("#my-list"), myMsg = $(".form-msg", myForm);
+  let myCred = null;
+  async function findMine() {
+    if (!myCred) return;
+    myMsg.textContent = "찾는 중…";
+    try {
+      const rows = await rpc("my_posts", { p_nickname: myCred.nick, p_password: myCred.pw });
+      myList.innerHTML = "";
+      if (!rows.length) { myMsg.textContent = "글을 찾지 못했어요. 닉네임과 비밀번호를 확인해 주세요."; return; }
+      myMsg.textContent = `${rows.length}개의 글을 찾았어요.`;
+      rows.forEach((r) => myList.appendChild(renderMine(r)));
+    } catch { myMsg.textContent = "잠시 후 다시 시도해 주세요."; }
+  }
+  function renderMine(r) {
+    const li = document.createElement("li");
+    li.innerHTML = `<div class="head"><span class="who"><span class="tag"></span></span><span class="when"></span></div><p class="msg"></p>
+      <div class="acts-row"><button type="button" data-a="edit">수정</button><button type="button" data-a="del">삭제</button></div>`;
+    const tag = $(".tag", li);
+    tag.textContent = r.kind === "ilchon" ? "응원" : r.is_anon ? "편지 · 비공개" : "편지";
+    if (r.is_anon) tag.classList.add("anon");
+    $(".when", li).textContent = fmt(r.created_at);
+    $(".msg", li).textContent = r.message;
+    const max = r.kind === "ilchon" ? 40 : 2000;
+    li.addEventListener("click", async (e) => {
+      const b = e.target.closest("button[data-a]");
+      if (!b) return;
+      const a = b.dataset.a;
+      if (a === "edit") {
+        if ($("textarea", li)) return;
+        const ta = document.createElement("textarea");
+        ta.maxLength = max; ta.rows = r.kind === "ilchon" ? 2 : 5; ta.value = r.message;
+        $(".msg", li).after(ta); ta.focus();
+        $(".acts-row", li).innerHTML = `<button type="button" data-a="save">저장</button><button type="button" data-a="cancel">취소</button>`;
+      } else if (a === "cancel") {
+        li.replaceWith(renderMine(r));
+      } else if (a === "save") {
+        const v = $("textarea", li).value.trim();
+        if (!v) return;
+        try {
+          const ok = await rpc("edit_post", { p_id: r.id, p_password: myCred.pw, p_message: v });
+          if (ok !== true) { myMsg.textContent = "수정하지 못했어요."; return; }
+          r.message = v;
+          li.replaceWith(renderMine(r));
+          myMsg.textContent = "수정했어요.";
+          if (r.kind === "ilchon" && me && !r.is_anon) { me.msgs = [v]; say(me, true, v); push({ t: "say", m: v.slice(0, 60) }); }
+          load(r.kind, true); loadPool();
+        } catch { myMsg.textContent = "수정하지 못했어요. 글자 수를 확인해 주세요."; }
+      } else if (a === "del") {
+        if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "정말 삭제할까요? 한 번 더 누르면 삭제돼요"; return; }
+        try {
+          const ok = await rpc("delete_post", { p_id: r.id, p_password: myCred.pw });
+          if (ok === true) { li.remove(); myMsg.textContent = "삭제했어요."; load(r.kind, true); loadPool(); }
+        } catch { myMsg.textContent = "삭제하지 못했어요."; }
+      }
+    });
+    return li;
+  }
+  myForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const fd = new FormData(myForm);
+    myCred = { nick: String(fd.get("nick")).trim(), pw: String(fd.get("password")) };
+    if (!myCred.nick || myCred.pw.length < 4) { myMsg.textContent = "닉네임과 비밀번호(4자 이상)를 넣어 주세요."; return; }
+    findMine();
+  });
+  document.addEventListener("hs:enter", () => { if (!$("[name=nick]", myForm).value) $("[name=nick]", myForm).value = guestName; });
+  if (guestName) $("[name=nick]", myForm).value = guestName;
+  $$("[data-go-my]").forEach((b) => b.addEventListener("click", () => {
+    openBlock("letter-sec");
+    setTimeout(() => $("#my-box").scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+  }));
+
   $$(".more").forEach((b) => b.addEventListener("click", () => load(b.dataset.more)));
 
   load("ilchon", true);
