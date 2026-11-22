@@ -566,9 +566,16 @@ body.rot-view .under{display:none}
 main .block.tab-off{display:none}
 
 /* 목록은 상자 안에서 스크롤 */
-#slogans,#letters{max-height:360px;overflow-y:auto;overscroll-behavior:contain;padding-right:6px;scrollbar-width:thin;scrollbar-color:#c5a3ff transparent}
-#slogans::-webkit-scrollbar,#letters::-webkit-scrollbar{width:6px}
-#slogans::-webkit-scrollbar-thumb,#letters::-webkit-scrollbar-thumb{background:#c5a3ff}
+#letters{max-height:360px;overflow-y:auto;overscroll-behavior:contain;padding-right:6px;scrollbar-width:thin;scrollbar-color:#c5a3ff transparent}
+#letters::-webkit-scrollbar{width:6px}
+#letters::-webkit-scrollbar-thumb{background:#c5a3ff}
+
+/* 응원 페이지 번호 */
+.pager{display:flex;justify-content:center;gap:4px;margin-top:14px;flex-wrap:wrap}
+.pager[hidden]{display:none}
+.pager button{min-width:26px;padding:3px 6px;border:2px solid var(--px-ink);background:#fff;color:#3b2f2a;font-family:"Galmuri9",monospace;font-size:11px;cursor:pointer;box-shadow:2px 2px 0 #c5a3ff}
+.pager button.on{background:var(--px-purple);color:#fff}
+.pager button:disabled{opacity:.35;cursor:default;box-shadow:none}
 
 /* 화면 맨 아래 미니 플레이어 */
 .ticker{width:min(560px,calc(100% - 28px));margin:10px auto 0}
@@ -778,7 +785,7 @@ body.has-player main{padding-bottom:90px}
       <button type="button" class="my-link" data-go-my>✎ 내가 쓴 글 수정·삭제하기</button>
     </form>
     <ul class="slogans" id="slogans"></ul>
-    <button class="more" data-more="ilchon" hidden>더 보기</button>
+    <div class="pager" id="slogan-pager" hidden></div>
         </div>
     </section>
 
@@ -1411,15 +1418,18 @@ window.SITE = {
   }));
   if (entered && guestName && S.bgm) play(S.bgm.url, S.bgm.title);
   // 맨 아래 나가기: 음악을 끄고 처음 초대장으로
-  $("#exit-btn").addEventListener("click", () => {
+  function goGate(text) {
     stop();
     try { sessionStorage.removeItem("entered"); sessionStorage.removeItem("gpw"); } catch {}
+    document.body.classList.remove("rot-view");
     invite.classList.remove("open");
-    nameInput.value = guestName; pwInput.value = ""; nameMsg.textContent = "";
+    nameInput.value = guestName; pwInput.value = ""; nameMsg.textContent = text || "";
     gate.classList.remove("hide");
     document.body.classList.add("locked");
     window.scrollTo({ top: 0 });
-  });
+    document.dispatchEvent(new Event("hs:exit"));
+  }
+  $("#exit-btn").addEventListener("click", () => goGate(""));
 
   /* ---------- 접었다 펴는 메뉴 ---------- */
   $$(".fold-head").forEach((h) => {
@@ -1991,7 +2001,37 @@ window.SITE = {
   document.addEventListener("hs:enter", () => {
     if (me) { setName(me, guestName); if (ch && rtOn) ch.track({ n: guestName, x: Math.round(me.x), y: Math.round(me.y) }); }
     startFloor();
+    watchNick();
   });
+
+  /* ---------- 같은 닉네임은 한 곳에서만: 나중에 들어온 곳이 남고, 먼저 있던 곳은 나가짐 ---------- */
+  const pageId = "p" + Math.random().toString(36).slice(2, 12);
+  let nickCh = null, joinedAt = 0;
+  async function unwatchNick() { const c = nickCh; nickCh = null; if (c && sb) { try { await c.untrack(); await sb.removeChannel(c); } catch {} } }
+  async function watchNick() {
+    if (!sb || !guestName) return;
+    await unwatchNick();
+    joinedAt = Date.now();
+    const myNick = guestName;
+    const c = sb.channel("nick-" + hash(myNick), { config: { presence: { key: pageId } } });
+    nickCh = c;
+    c.on("presence", { event: "sync" }, () => {
+      if (nickCh !== c) return;
+      const st = c.presenceState();
+      for (const [id, metas] of Object.entries(st)) {
+        if (id === pageId) continue;
+        const m = metas[metas.length - 1] || {};
+        if (m.n === myNick && Number(m.t || 0) > joinedAt) { kickedOut(); return; }
+      }
+    }).subscribe((status) => { if (status === "SUBSCRIBED" && nickCh === c) c.track({ n: myNick, t: joinedAt }); });
+  }
+  async function kickedOut() {
+    await unwatchNick();
+    await leave();
+    removeFan("me"); me = null;
+    goGate("다른 곳에서 같은 닉네임으로 입장해서 나가졌어요.");
+  }
+  document.addEventListener("hs:exit", () => { unwatchNick(); leave(); removeFan("me"); me = null; });
   // 창을 내리거나 10분 동안 가만히 있으면 연결을 끊어서 자리를 비워 둔다
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) leave();
@@ -2032,26 +2072,24 @@ window.SITE = {
   });
   document.addEventListener("click", (e) => { if (!e.target.closest(".acts")) emoPick.hidden = true; });
 
+  // 오늘(한국 시간) 방문자 수: 기기 하나당 하루 1명으로 서버에 쌓임
+  let todayVisits = 0;
+  const visitorId = (() => { let v = store.get("vid"); if (!v) { v = "v" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10); store.set("vid", v); } return v; })();
+  async function logVisit() { try { todayVisits = Number(await rpc("log_visit", { p_visitor: visitorId })) || 0; updateCount(); } catch {} }
+  logVisit();
+  setInterval(() => { if (!document.hidden) logVisit(); }, 5 * 60000);
   function updateCount() {
     const el = $("#floor-count");
-    if (rtOn) el.innerHTML = `지금 <b>${liveCount}</b>명 함께 있어요 · ${room}관`;
-    else el.innerHTML = fans.size ? `<b>${fans.size}</b>명이 놀러 왔어요` : "";
+    const parts = [];
+    if (todayVisits) parts.push(`오늘 <b>${todayVisits}</b>명 놀러 왔어요`);
+    if (rtOn) parts.push(`지금 <b>${liveCount}</b>명 함께 · ${room}관`);
+    el.innerHTML = parts.join(" · ");
   }
+  // 스탠딩에는 지금 접속해 있는 사람만 (나가면 미니미도 사라짐)
   function syncFans() {
-    const limit = narrow ? 12 : 26;
-    const liveNames = new Set([...fans.values()].filter((f) => f.live || f.me).map((f) => f.nick));
-    const byNick = new Map();
-    for (const p of pool) {
-      if (liveNames.has(p.nickname)) continue;
-      if (!byNick.has(p.nickname)) { if (byNick.size >= limit - liveNames.size) continue; byNick.set(p.nickname, []); }
-      const arr = byNick.get(p.nickname);
-      if (arr.length < 1) arr.push(p.message);
-    }
-    for (const [nick, msgs] of byNick) addFan("npc:" + nick, nick, msgs);
-    for (const f of [...fans.values()]) if (!f.me && !f.live) {
-      if (me && f.nick === me.nick) removeFan(f.key);
-      else if (me) { const mm = pool.find((p) => p.nickname === me.nick); if (mm) me.msgs = [mm.message]; }
-    }
+    for (const f of [...fans.values()]) if (!f.me && !f.live) removeFan(f.key);
+    if (me) { const mm = pool.find((p) => p.nickname === me.nick); if (mm) me.msgs = [mm.message]; }
+    for (const f of fans.values()) if (f.live) { const mm = pool.find((p) => p.nickname === f.nick); if (mm) f.msgs = [mm.message]; }
     updateCount();
   }
 
@@ -2072,7 +2110,41 @@ window.SITE = {
   const state = { ilchon: { offset: 0, el: $("#slogans") }, guestbook: { offset: 0, el: $("#letters") } };
   const fmt = (iso) => { const d = new Date(iso); return `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 
+  // 응원: 10개씩 한 페이지 (1페이지가 최신, 뒤로 갈수록 예전 글)
+  const SLOGAN_PAGE = 10;
+  let sloganPage = 0, sloganTotal = 0;
+  async function loadSloganPage(n) {
+    const el = state.ilchon.el;
+    const url = `${API}/posts?select=id,nickname,message,created_at,updated_at,image_url&kind=eq.ilchon&order=id.desc&limit=${SLOGAN_PAGE}&offset=${n * SLOGAN_PAGE}`;
+    try {
+      const res = await fetch(url, { headers: { ...HEADERS, Prefer: "count=exact" } });
+      if (!res.ok) throw new Error(res.status);
+      const rows = await res.json();
+      sloganTotal = Number((res.headers.get("content-range") || "").split("/")[1]) || 0;
+      sloganPage = n;
+      el.innerHTML = "";
+      if (!rows.length) el.innerHTML = `<li class="empty">첫 번째 한마디를 남겨 주세요!</li>`;
+      rows.forEach((r) => el.appendChild(render("ilchon", r)));
+      renderPager();
+    } catch { el.innerHTML = `<li class="empty">글을 불러오지 못했어요. 잠시 후 새로고침해 주세요.</li>`; }
+  }
+  function renderPager() {
+    const pg = $("#slogan-pager");
+    const pages = Math.max(1, Math.ceil(sloganTotal / SLOGAN_PAGE));
+    pg.hidden = pages <= 1;
+    if (pages <= 1) return;
+    let from = Math.max(0, sloganPage - 2), to = Math.min(pages - 1, from + 4); from = Math.max(0, to - 4);
+    let h = `<button type="button" data-p="${sloganPage - 1}" ${sloganPage === 0 ? "disabled" : ""}>◀</button>`;
+    for (let i = from; i <= to; i++) h += `<button type="button" data-p="${i}" class="${i === sloganPage ? "on" : ""}">${i + 1}</button>`;
+    h += `<button type="button" data-p="${sloganPage + 1}" ${sloganPage >= pages - 1 ? "disabled" : ""}>▶</button>`;
+    pg.innerHTML = h;
+  }
+  $("#slogan-pager").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-p]"); if (!b || b.disabled) return;
+    loadSloganPage(Number(b.dataset.p));
+  });
   async function load(kind, reset) {
+    if (kind === "ilchon") return loadSloganPage(reset ? 0 : sloganPage);
     const st = state[kind];
     if (reset) { st.offset = 0; st.el.innerHTML = ""; }
     const url = `${API}/posts?select=id,nickname,message,created_at,updated_at,image_url&kind=eq.${kind}&order=id.desc&limit=${PAGE}&offset=${st.offset}`;
@@ -2421,7 +2493,7 @@ window.SITE = {
   load("ilchon", true);
   load("guestbook", true);
   loadPool();
-  if (entered && guestName) startFloor();
+  if (entered && guestName) { startFloor(); watchNick(); }
   setInterval(loadPool, 60000);
 })();
 
