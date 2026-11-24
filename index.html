@@ -1706,6 +1706,12 @@ window.SITE = {
       ".ohh......", ".ohh......", ".ohh......", ".ohh......", ".ohho.....",
       "..oo......",
     ],
+    // 비니 아래로 삐져나오는 풍성한 뽀글머리 (전용)
+    curly2: [
+      "...oo.oooo", "..ohhohhhh", ".ohhhhhhhh", ".ohhhhhhhh", "ohhhhhhhhh",
+      "ohhhhhhhhh", "ohHhhhhhhh", "ohhHoh....", "oHhho.....", "ohHho.....",
+      "oHhho.....", ".ohHo.....", "ohhho.....", ".oHo......", "..o.......",
+    ],
     curly: [
       "...oo.oooo", "..ohhohhhh", ".ohhhhhhhh", ".ohhhhhhhh", "ohhhhhhhhh",
       "ohhhhhhhhh", "ohhh.hhh.h", "ohh.......", ".oh.......", ".oh.......",
@@ -1715,6 +1721,11 @@ window.SITE = {
     beanie: [
       "....oooooo", "...occcccc", "..occcccdc", ".occdccccc", ".occcccdcc",
       "oCCCCCCCCC", "oCCCCCCCCC", ".o........",
+    ],
+    // 니트 비니 (전용)
+    beanie2: [
+      "..........", "....oooooo", "...oqqcccc", "..oqcccccc", ".occcccccc",
+      "oCDCDCDCDC", "oCDCDCDCDC", ".o........",
     ],
     cap: [
       "......oooo", "....occccc", "...occcccc", "..occcccdd", "..occccccc",
@@ -1732,17 +1743,36 @@ window.SITE = {
   const OUT = "#2a1720";
   const mirror = (rows) => rows.map((r) => r + [...r].reverse().join(""));
 
-  function buildGrid(seed) {
+  // 특정 닉네임 전용 옷 (닉네임은 비밀번호로 주인이 정해져 있어서 흉내 낼 수 없음)
+  const SPECIAL = {
+    "쿄쿄로그": { hat: "beanie2", hair: "curly2", pal: { h: "#1b1618", H: "#4d4249", c: "#7b1e34", q: "#a3445c", C: "#8e2a42", D: "#62172b", w: "#f6ece4", W: "#d9c6b8", t: "#fbf3ea", T: "#e6d6c6", p: "#4f74a8", P: "#3a5a88", k: "#17171c" }, stripe: "#7b1e34" },
+    "싱": { hair: "long", short: true, pal: { h: "#1b1618", H: "#2f2729", t: "#ffffff", T: "#dcd8e4", p: "#4f74a8", P: "#3a5a88" } }, // 흰 반팔 + 청바지 + 까만 긴머리 (모자는 원래대로)
+    "민초예뿌다": { hood: true, hair: "long", skirt: true, pal: { t: "#a8ecd6", T: "#6fcdb0", x: "#ffffff", p: "#1f1d24", P: "#141218" } }, // 민트 후드티
+    // 버건디 니트 비니 + 스트라이프 티 + 청바지 + 검정 신발
+  };
+  function buildGrid(seed, ov) {
     const g = mirror(BASE_L).map((r) => [...r]);
     const R = (n) => (seed >> n) & 7;
-    const hairKeys = Object.keys(HAIR_L), hatKeys = ["none", "none", "beanie", "cap"];
-    const hair = mirror(HAIR_L[hairKeys[R(0) % hairKeys.length]]);
+    const hairKeys = Object.keys(HAIR_L).filter((k) => k !== "curly2"), hatKeys = ["none", "none", "beanie", "cap"];
+    const hair = mirror(HAIR_L[ov && ov.hair ? ov.hair : hairKeys[R(0) % hairKeys.length]]);
     hair.forEach((row, y) => [...row].forEach((c, x) => { if (c !== ".") g[y][x] = c; }));
-    const hat = hatKeys[R(3) % hatKeys.length];
+    const hat = ov && ov.hat ? ov.hat : hatKeys[R(3) % hatKeys.length];
     if (hat !== "none") {
       const rows = mirror(HAT_L[hat]);
       rows.forEach((row, y) => [...row].forEach((c, x) => { if (c !== ".") g[y][x] = c; }));
       if (hat === "cap") { g[6][15] = "C"; g[6][16] = "C"; g[6][17] = "C"; g[7][16] = "o"; g[7][17] = "o"; }
+    }
+    if (ov && ov.skirt) { // 롱치마: 다리 대신 아래로 퍼지는 치마
+      const SK = ["......oppp", ".....opppp", ".....opppp", "....oPpppp"];
+      mirror(SK).forEach((row, i) => [...row].forEach((c, x) => { g[19 + i][x] = c; }));
+      mirror([".....okkko", ".....ooooo"]).forEach((row, i) => [...row].forEach((c, x) => { g[23 + i][x] = c; }));
+    }
+    if (ov && ov.short) { g[17][4] = g[17][15] = "s"; } // 반팔: 팔뚝 살 보이게
+    if (ov && ov.hood) { // 후드티: 목 둘레 후드 + 끈 + 앞주머니
+      for (const x of [6, 7, 12, 13]) g[14][x] = "T";
+      g[14][5] = g[14][14] = "o";
+      g[15][8] = g[16][8] = g[15][11] = g[16][11] = "x";
+      for (const x of [8, 9, 10, 11]) g[17][x] = "T";
     }
     if (R(6) % 5 === 0) { // 안경
       for (const x of [4, 7, 12, 15]) { g[7][x] = "o"; g[8][x] = "o"; }
@@ -1752,20 +1782,26 @@ window.SITE = {
     return { g, hat };
   }
 
-  function lift(g, side) {
+  function lift(g, side, skirt) {
+    if (skirt) { // 치마는 신발만 살짝
+      const cols = side === "l" ? [5, 6, 7, 8, 9] : [10, 11, 12, 13, 14];
+      for (const x of cols) { g[23][x] = g[24][x]; g[24][x] = "."; }
+      return;
+    }
     // 걸을 때 한쪽 다리를 한 칸 올린다
     const cols = side === "l" ? [5, 6, 7, 8, 9] : [10, 11, 12, 13, 14];
     for (let y = 19; y <= 24; y++) for (const x of cols) g[y - 1][x] = y === 19 ? g[y - 1][x] : g[y][x];
     for (const x of cols) g[24][x] = ".";
   }
 
-  function paint(g, seed) {
+  function paint(g, seed, ov) {
     const P = (arr, n) => arr[((seed >> n) >>> 0) % arr.length];
-    const skin = P(PAL.skin, 9), hair = P(PAL.hair, 11), top = P(PAL.top, 14), pants = P(PAL.pants, 17), shoes = P(PAL.shoes, 19), hat = P(PAL.hat, 21);
+    const skin = P(PAL.skin, 9), hair = P(PAL.hair, 11), top = P(PAL.top, 14), pants = P(PAL.pants, 17), shoes = P(PAL.shoes, 19), hat = ov && ov.hatColors ? ov.hatColors : P(PAL.hat, 21);
     const map = {
       o: OUT, s: skin[0], b: "#ff9fb4", e: "#2a1720", m: "#c4566e", h: hair[0], H: hair[1],
       t: top[0], T: top[1], p: pants[0], P: pants[1], k: shoes, c: hat[0], d: hat[1], C: hat[2],
     };
+    if (ov && ov.pal) Object.assign(map, ov.pal);
     const W = 20, H = 25, S = 1;
     const cv = document.createElement("canvas");
     cv.width = W; cv.height = H;
@@ -1773,6 +1809,7 @@ window.SITE = {
     g.forEach((row, y) => row.forEach((c, x) => {
       if (c === "." || !map[c]) return;
       cx.fillStyle = map[c];
+      if (ov && ov.stripe && (c === "t" || c === "T") && y % 2 === 0) cx.fillStyle = ov.stripe; // 가로 스트라이프
       cx.fillRect(x * S, y * S, S, S);
     }));
     // 눈 반짝이
@@ -1781,18 +1818,20 @@ window.SITE = {
   }
 
   const spriteCache = new Map();
-  function sprites(seed) {
-    if (spriteCache.has(seed)) return spriteCache.get(seed);
-    const { g } = buildGrid(seed);
-    const idle = paint(g.map((r) => [...r]), seed);
-    const a = g.map((r) => [...r]); lift(a, "l");
-    const b = g.map((r) => [...r]); lift(b, "r");
-    const res = { idle, a: paint(a, seed), b: paint(b, seed) };
-    spriteCache.set(seed, res);
+  function sprites(seed, nick) {
+    const ov = SPECIAL[nick] || null;
+    const ck = seed + "|" + (ov ? nick : "");
+    if (spriteCache.has(ck)) return spriteCache.get(ck);
+    const { g } = buildGrid(seed, ov);
+    const idle = paint(g.map((r) => [...r]), seed, ov);
+    const a = g.map((r) => [...r]); lift(a, "l", ov && ov.skirt);
+    const b = g.map((r) => [...r]); lift(b, "r", ov && ov.skirt);
+    const res = { idle, a: paint(a, seed, ov), b: paint(b, seed, ov) };
+    spriteCache.set(ck, res);
     return res;
   }
-  function fanSprite(seed) {
-    const s = sprites(seed);
+  function fanSprite(seed, nick) {
+    const s = sprites(seed, nick);
     return `<span class="sprite" aria-hidden="true"><img class="f-idle" src="${s.idle}" alt=""><img class="f-a" src="${s.a}" alt=""><img class="f-b" src="${s.b}" alt=""><i class="meriel-glow"></i></span>`;
   }
 
@@ -1806,7 +1845,7 @@ window.SITE = {
     el.type = "button";
     el.className = "fan" + (opt.isNew ? " new" : "") + (opt.me ? " me" : "") + (opt.live ? " live" : "");
     el.setAttribute("aria-label", `${nick}${opt.me ? "(나)" : ""}`);
-    el.innerHTML = fanSprite(hash(nick)) + `<span class="name"></span>`;
+    el.innerHTML = fanSprite(hash(nick), nick) + `<span class="name"></span>`;
     $(".name", el).textContent = [...nick].slice(0, 5).join("");
     const f = { key, el, nick, msgs: msgs.slice(0, 1), me: !!opt.me, live: !!opt.live,
       x: opt.x ?? rand(8, 92), y: opt.y ?? rand(Y_MIN, Y_MAX), wait: rand(0, 2) };
@@ -1822,7 +1861,7 @@ window.SITE = {
     if (f.nick === nick) return;
     f.nick = nick;
     $(".name", f.el).textContent = [...nick].slice(0, 5).join("");
-    const s = sprites(hash(nick));
+    const s = sprites(hash(nick), nick);
     const [i0, ia, ib] = $$(".sprite img", f.el);
     i0.src = s.idle; ia.src = s.a; ib.src = s.b;
   }
@@ -1884,7 +1923,7 @@ window.SITE = {
   /* ---------- 동작 효과 ---------- */
   const HEART_G = [".pp.pp.", "pwppppp", "ppppppp", ".ppppp.", "..ppp..", "...p..."];
   const HEART_PX = pxImg(7, 6, (x, y) => (HEART_G[y][x] === "." ? null : HEART_G[y][x]), { p: "#ff5c9e", w: "#ffd1e4" });
-  const EMOJIS = ["💚", "🎉", "🎂", "🏠", "🌳"];
+  const EMOJIS = ["💚", "🎉", "🎂", "🏠", "🍦"];
   const emoHtml = (e) => e;
   function fx(f, html, dx, delay) {
     setTimeout(() => {
@@ -2459,31 +2498,40 @@ window.SITE = {
     return true;
   }
   const plantBtn = $("#plant-btn");
-  const hasPlanted = () => store.get("plantedTree2") === "1";
+  // 3분에 한 그루씩 심을 수 있어요 (남은 시간을 버튼에 표시)
+  const COOL = 3 * 60 * 1000;
+  const leftMs = () => Math.max(0, (Number(store.get("plantAt")) || 0) + COOL - Date.now());
   function updPlant() {
-    plantBtn.innerHTML = hasPlanted() ? '<i class="a-ico">🌳</i><span>심었어요</span>' : '<i class="a-ico">🌳</i><span>심기</span>';
-    plantBtn.classList.toggle("done", hasPlanted());
+    const ms = leftMs();
+    if (ms > 0) {
+      const sec = Math.ceil(ms / 1000);
+      plantBtn.innerHTML = `<i class="a-ico">🌳</i><span>${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}</span>`;
+    } else plantBtn.innerHTML = '<i class="a-ico">🌳</i><span>심기</span>';
+    plantBtn.classList.toggle("done", ms > 0);
     plantBtn.disabled = false;
   }
+  setInterval(() => { if (!plantBtn.dataset.busy) updPlant(); }, 1000);
   plantBtn.addEventListener("click", async (e) => {
     e.stopPropagation();
-    if (hasPlanted()) { fx(me || ensureMe(), "🌳", 0, 0); return; } // 이미 심었으면 내 나무 인사만
+    if (leftMs() > 0) { fx(me || ensureMe(), "🌳", 0, 0); return; } // 기다리는 중엔 내 나무 인사만
     if (!ensureMe()) return;
     wake();
     const x = Math.round(clamp(me.x + rand(-4, 4), 2, 98) * 10) / 10;
     const y = Math.round(rand(10, 95) * 10) / 10;
-    plantBtn.disabled = true; $("span", plantBtn).textContent = "심는 중…";
+    plantBtn.dataset.busy = "1"; plantBtn.disabled = true; $("span", plantBtn).textContent = "심는 중…";
     try {
       await rpc("plant_tree", { p_nickname: guestName, p_x: x, p_y: y });
-      store.set("plantedTree2", "1");
+      store.set("plantAt", String(Date.now()));
       addTree(guestName, x, y, true);
       fx(me, "🌱", 0, 0);
       push({ t: "tree", x, y });
     } catch (err) {
+      if (/too soon/.test(String(err))) store.set("plantAt", String(Date.now() - COOL + 60000)); // 서버가 아직이라면 잠시 뒤
       $("span", plantBtn).textContent = /too soon/.test(String(err)) ? "조금 뒤에" : "다시 눌러요";
-      setTimeout(updPlant, 2500);
+      setTimeout(() => { delete plantBtn.dataset.busy; updPlant(); }, 2000);
       return;
     }
+    delete plantBtn.dataset.busy;
     updPlant();
   });
   updPlant();
