@@ -2459,7 +2459,7 @@ window.SITE = {
     return true;
   }
   const plantBtn = $("#plant-btn");
-  const hasPlanted = () => store.get("plantedTree") === "1";
+  const hasPlanted = () => store.get("plantedTree2") === "1";
   function updPlant() {
     plantBtn.innerHTML = hasPlanted() ? '<i class="a-ico">🌳</i><span>심었어요</span>' : '<i class="a-ico">🌳</i><span>심기</span>';
     plantBtn.classList.toggle("done", hasPlanted());
@@ -2475,7 +2475,7 @@ window.SITE = {
     plantBtn.disabled = true; $("span", plantBtn).textContent = "심는 중…";
     try {
       await rpc("plant_tree", { p_nickname: guestName, p_x: x, p_y: y });
-      store.set("plantedTree", "1");
+      store.set("plantedTree2", "1");
       addTree(guestName, x, y, true);
       fx(me, "🌱", 0, 0);
       push({ t: "tree", x, y });
