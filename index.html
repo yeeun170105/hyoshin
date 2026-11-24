@@ -458,12 +458,16 @@ main{background:
 .letters .edited{margin-left:6px;font-size:10px;color:#a99fc0;font-family:"Galmuri9",monospace}
 
 /* 나무 심기: 스탠딩 아래 숲 */
-.grove{position:absolute;left:0;bottom:0;width:100%;height:40%;z-index:1;pointer-events:none;image-rendering:pixelated}
+.forest{order:1;position:relative;width:min(1600px,100%);margin:0 auto;height:clamp(110px,11vw,150px);overflow:hidden;cursor:pointer;
+  background:linear-gradient(#123024,#16402c 40%,#1d5234);border-top:3px solid #0b1f17;border-bottom:3px solid #0b1f17}
+.forest::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:repeating-linear-gradient(90deg,#2f7d4a 0 4px,#3f9a5a 4px 8px,#256b3e 8px 12px);opacity:.9}
+.forest-label{position:absolute;left:14px;top:12px;z-index:2;font-family:"Galmuri11",monospace;font-size:10px;letter-spacing:.2em;color:#d8f5d0;text-shadow:2px 2px 0 #0b1f17;pointer-events:none}
+.grove{position:absolute;left:0;top:0;width:100%;height:100%;z-index:1;pointer-events:none;image-rendering:pixelated}
 .acts .plant-btn{background:#e4f7d6;box-shadow:2px 2px 0 #6fc25e}
 .acts .plant-btn .a-ico{font-size:10px}
 .acts .plant-btn.done{cursor:default}
 .acts .plant-btn.done:active{transform:none;box-shadow:2px 2px 0 #6fc25e}
-.grove-count{position:absolute;left:14px;top:30px;z-index:2;font-family:"Galmuri9",monospace;font-size:9px;color:#9fd6a0;white-space:nowrap;pointer-events:none}
+.grove-count{position:absolute;right:14px;top:13px;z-index:2;font-family:"Galmuri9",monospace;font-size:9px;color:#9fd6a0;white-space:nowrap;pointer-events:none}
 .tree-tip{position:absolute;z-index:3001;padding:1px 5px;border:1px solid #1c1a33;background:#fffaf0;color:#1c1a33;font-family:"Galmuri9",monospace;font-size:9px;white-space:nowrap;transform:translate(-50%,-100%);pointer-events:none}
 .tree-tip[hidden]{display:none}
 @media (max-width:520px){.floor-hint{top:46px}}
@@ -738,9 +742,6 @@ body.has-player main{padding-bottom:90px}
     <span class="floor-label"><img class="px t-ico" data-icon="people" alt="">STANDING</span>
     <span class="floor-count" id="floor-count"></span>
     <span class="floor-hint" id="floor-hint">바닥을 누르면 내 미니미가 걸어가요</span>
-    <canvas class="grove" id="grove" aria-hidden="true"></canvas>
-    <span class="grove-count" id="grove-count"></span>
-    <span class="tree-tip" id="tree-tip" hidden></span>
     <div class="acts" id="acts" role="group" aria-label="응원 동작">
       <button type="button" data-act="meriel"><i class="a-ico">✦</i>메리엘</button>
       <button type="button" data-act="heart"><i class="a-ico">♥</i>하트</button>
@@ -749,6 +750,13 @@ body.has-player main{padding-bottom:90px}
       <button type="button" class="plant-btn" id="plant-btn"><i class="a-ico">🌱</i><span>나무 심기</span></button>
       <div class="emo-pick" id="emo-pick" hidden></div>
     </div>
+  </div>
+
+  <div class="forest" id="forest" aria-label="우리 숲: 팬들이 심은 나무">
+    <span class="forest-label">🌳 OUR FOREST</span>
+    <span class="grove-count" id="grove-count"></span>
+    <canvas class="grove" id="grove" aria-hidden="true"></canvas>
+    <span class="tree-tip" id="tree-tip" hidden></span>
   </div>
 
   <div class="ticker" id="ticker" aria-label="축하 메시지"><span id="ticker-text">축하 메시지가 여기에 흘러가요</span></div>
@@ -2083,7 +2091,6 @@ window.SITE = {
 
   floor.addEventListener("click", (e) => {
     if (e.target.closest(".acts") || e.target.closest(".fan") || e.target.closest(".plant-btn")) return;
-    if (treeAt(e)) return; // 나무를 누르면 누가 심었는지 보여 줌
     if (!ensureMe()) return;
     wake();
     const lf = localFrac(floor, e);
@@ -2427,7 +2434,7 @@ window.SITE = {
   let growing = false;
   const treePos = (t) => {
     const W = grove.clientWidth, H = grove.clientHeight;
-    return { px: (t.x / 100) * W, py: (0.14 + (t.y / 100) * 0.82) * H, sc: 1 + (t.y / 100) * 0.6 };
+    return { px: (0.02 + (t.x / 100) * 0.96) * W, py: (0.42 + (t.y / 100) * 0.52) * H, sc: 1.6 + (t.y / 100) * 0.8 };
   };
   function drawGrove() {
     const dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -2476,13 +2483,14 @@ window.SITE = {
     } catch {}
   }
   new ResizeObserver(() => drawGrove()).observe(grove);
+  $("#forest").addEventListener("click", (e) => treeAt(e)); // 나무를 누르면 누가 심었는지
   const tip = $("#tree-tip");
   function treeAt(e) {
     const r = grove.getBoundingClientRect();
     const lf = localFrac(grove, e);
     const cx = lf.fx * grove.clientWidth, cy = lf.fy * grove.clientHeight;
     if (cy < 0) return false;
-    let best = null, bd = 9;
+    let best = null, bd = 14;
     for (const t of trees) {
       const { px, py, sc } = treePos(t);
       const d = Math.hypot(px - cx, py - 4 * sc - cy);
@@ -2499,7 +2507,7 @@ window.SITE = {
   }
   const plantBtn = $("#plant-btn");
   // 3분에 한 그루씩 심을 수 있어요 (남은 시간을 버튼에 표시)
-  const COOL = 3 * 60 * 1000;
+  const COOL = 60 * 1000; // 1분에 한 그루
   const leftMs = () => Math.max(0, (Number(store.get("plantAt")) || 0) + COOL - Date.now());
   function updPlant() {
     const ms = leftMs();
