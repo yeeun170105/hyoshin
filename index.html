@@ -1720,6 +1720,13 @@ window.SITE = {
       "ohhhhhhhhh", "ohHhhhhhhh", "ohhHoh....", "oHhho.....", "ohHho.....",
       "oHhho.....", ".ohHo.....", "ohhho.....", ".oHo......", "..o.......",
     ],
+    // 긴 뽀글 파마 (전용)
+    curlylong: [
+      "...oo.oooo", "..ohhohhhh", ".ohhhhhhhh", ".ohhhhhhhh", "ohhhhhhhhh",
+      "ohhhhhhhhh", "ohhh.hhh.h", "ohhH......", "oHhh......", "ohHh......",
+      "oHhho.....", ".ohHo.....", "ohhho.....", "oHhho.....", "ohHo......",
+      "oHho......", ".oho......", "..o.......",
+    ],
     curly: [
       "...oo.oooo", "..ohhohhhh", ".ohhhhhhhh", ".ohhhhhhhh", "ohhhhhhhhh",
       "ohhhhhhhhh", "ohhh.hhh.h", "ohh.......", ".oh.......", ".oh.......",
@@ -1762,15 +1769,15 @@ window.SITE = {
     "싱": { hair: "long", short: true, pal: { h: "#1b1618", H: "#2f2729", t: "#ffffff", T: "#dcd8e4", p: "#4f74a8", P: "#3a5a88" } }, // 흰 반팔 + 청바지 + 까만 긴머리 (모자는 원래대로)
     "가지들어": { hat: "cap", capFront: true, hair: "long", pal: { c: "#1c1a22", d: "#3a3644", C: "#0f0e13", p: "#4f74a8", P: "#3a5a88" } }, // 까만 모자
     "쏘쏘": { hat: "none", hair: "long", uniform: true, pal: { h: "#1b1618", H: "#3a3034", c: "#16151b", d: "#f3d23a", C: "#0b0a0e", y: "#f3d23a", z: "#cfd3dd", t: "#1b1a21", T: "#0e0d12", p: "#16151b", P: "#0e0d12", k: "#0e0d12" } }, // 공연 제복 (까만 자켓 + 노란 장식)
-    "오늘도쿄": { hood: true, pal: { t: "#ffb3d4", T: "#f08bb8", x: "#ffffff", p: "#4f74a8", P: "#3a5a88" } }, // 핑크 후드 + 청바지
-    "서소금💚": { hat: "cap", capFront: true, hair: "curly2", sun: true, short: true, pal: { c: "#ff8cc6", d: "#ffffff", C: "#e0609f", G: "#1d1b26", g: "#7d7896", t: "#ffffff", T: "#dcd8e4", p: "#4f74a8", P: "#3a5a88" } }, // 빠글 파마 + 동그란 선글라스 + 핑크 모자 + 흰 반팔 + 청바지
+    "오늘도쿄": { hat: "none", hood: true, pal: { t: "#ffb3d4", T: "#f08bb8", x: "#ffffff", p: "#4f74a8", P: "#3a5a88" } }, // 모자 없이 핑크 후드 + 청바지
+    "서소금💚": { hat: "cap", hair: "curlylong", sun: true, short: true, pal: { c: "#ff8cc6", d: "#ffffff", C: "#e0609f", h: "#1b1618", H: "#4d4249", G: "#1d1b26", g: "#7d7896", t: "#ffffff", T: "#dcd8e4" } }, // 까만 뽀글머리 + 동그란 선글라스 + 흰 반팔
     "민초예뿌다": { hood: true, hair: "long", skirt: true, pal: { t: "#a8ecd6", T: "#6fcdb0", x: "#ffffff", p: "#1f1d24", P: "#141218" } }, // 민트 후드티
     // 버건디 니트 비니 + 스트라이프 티 + 청바지 + 검정 신발
   };
   function buildGrid(seed, ov) {
     const g = mirror(BASE_L).map((r) => [...r]);
     const R = (n) => (seed >> n) & 7;
-    const hairKeys = Object.keys(HAIR_L).filter((k) => k !== "curly2"), hatKeys = ["none", "none", "beanie", "cap"];
+    const hairKeys = Object.keys(HAIR_L).filter((k) => k !== "curly2" && k !== "curlylong"), hatKeys = ["none", "none", "beanie", "cap"];
     const hair = mirror(HAIR_L[ov && ov.hair ? ov.hair : hairKeys[R(0) % hairKeys.length]]);
     hair.forEach((row, y) => [...row].forEach((c, x) => { if (c !== ".") g[y][x] = c; }));
     const hat = ov && ov.hat ? ov.hat : hatKeys[R(3) % hatKeys.length];
