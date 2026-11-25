@@ -1735,6 +1735,11 @@ window.SITE = {
       "..........", "....oooooo", "...oqqcccc", "..oqcccccc", ".occcccccc",
       "oCDCDCDCDC", "oCDCDCDCDC", ".o........",
     ],
+    // 제복 모자 (전용): 남색 + 금색 배지 + 까만 챙
+    peak: [
+      "..........", "....oooooo", "...occcccc", "..occccccc",
+      ".odddddddy", ".oCCCCCCCC", ".o........",
+    ],
     cap: [
       "......oooo", "....occccc", "...occcccc", "..occcccdd", "..occccccc",
       ".oCCCCCCCC", ".o........",
@@ -1755,6 +1760,10 @@ window.SITE = {
   const SPECIAL = {
     "쿄쿄로그": { hat: "beanie2", hair: "curly2", pal: { h: "#1b1618", H: "#4d4249", c: "#7b1e34", q: "#a3445c", C: "#8e2a42", D: "#62172b", w: "#f6ece4", W: "#d9c6b8", t: "#fbf3ea", T: "#e6d6c6", p: "#4f74a8", P: "#3a5a88", k: "#17171c" }, stripe: "#7b1e34" },
     "싱": { hair: "long", short: true, pal: { h: "#1b1618", H: "#2f2729", t: "#ffffff", T: "#dcd8e4", p: "#4f74a8", P: "#3a5a88" } }, // 흰 반팔 + 청바지 + 까만 긴머리 (모자는 원래대로)
+    "가지들어": { hat: "cap", capFront: true, hair: "long", pal: { c: "#1c1a22", d: "#3a3644", C: "#0f0e13", p: "#4f74a8", P: "#3a5a88" } }, // 까만 모자
+    "쏘쏘": { hat: "none", hair: "long", uniform: true, pal: { h: "#1b1618", H: "#3a3034", c: "#16151b", d: "#f3d23a", C: "#0b0a0e", y: "#f3d23a", z: "#cfd3dd", t: "#1b1a21", T: "#0e0d12", p: "#16151b", P: "#0e0d12", k: "#0e0d12" } }, // 공연 제복 (까만 자켓 + 노란 장식)
+    "오늘도쿄": { hood: true, pal: { t: "#ffb3d4", T: "#f08bb8", x: "#ffffff", p: "#4f74a8", P: "#3a5a88" } }, // 핑크 후드 + 청바지
+    "서소금💚": { hat: "cap", capFront: true, hair: "curly2", sun: true, short: true, pal: { c: "#ff8cc6", d: "#ffffff", C: "#e0609f", G: "#1d1b26", g: "#7d7896", t: "#ffffff", T: "#dcd8e4", p: "#4f74a8", P: "#3a5a88" } }, // 빠글 파마 + 동그란 선글라스 + 핑크 모자 + 흰 반팔 + 청바지
     "민초예뿌다": { hood: true, hair: "long", skirt: true, pal: { t: "#a8ecd6", T: "#6fcdb0", x: "#ffffff", p: "#1f1d24", P: "#141218" } }, // 민트 후드티
     // 버건디 니트 비니 + 스트라이프 티 + 청바지 + 검정 신발
   };
@@ -1768,12 +1777,22 @@ window.SITE = {
     if (hat !== "none") {
       const rows = mirror(HAT_L[hat]);
       rows.forEach((row, y) => [...row].forEach((c, x) => { if (c !== ".") g[y][x] = c; }));
-      if (hat === "cap") { g[6][15] = "C"; g[6][16] = "C"; g[6][17] = "C"; g[7][16] = "o"; g[7][17] = "o"; }
+      if (hat === "cap" && ov && ov.capFront) for (let x = 5; x <= 14; x++) g[6][x] = x === 5 || x === 14 ? "o" : "C"; // 챙이 앞으로
+      if (hat === "cap" && !(ov && ov.capFront)) { g[6][15] = "C"; g[6][16] = "C"; g[6][17] = "C"; g[7][16] = "o"; g[7][17] = "o"; }
     }
     if (ov && ov.skirt) { // 롱치마: 다리 대신 아래로 퍼지는 치마
       const SK = ["......oppp", ".....opppp", ".....opppp", "....oPpppp"];
       mirror(SK).forEach((row, i) => [...row].forEach((c, x) => { g[19 + i][x] = c; }));
       mirror([".....okkko", ".....ooooo"]).forEach((row, i) => [...row].forEach((c, x) => { g[23 + i][x] = c; }));
+    }
+    if (ov && ov.uniform) { // 공연 제복: 까만 자켓 + 노란 가로 장식(프로깅) + 은단추 + 까만 터틀넥
+      for (const x of [8, 9, 10, 11]) if (g[14][x] === "s") g[14][x] = "T";
+      for (const y of [15, 17]) {
+        g[y][6] = g[y][13] = "z";
+        g[y][7] = g[y][8] = g[y][11] = g[y][12] = "y";
+      }
+      for (let y = 15; y <= 18; y++) g[y][9] = g[y][10] = "T";
+      g[16][5] = g[16][14] = "y"; g[17][4] = g[17][15] = "y"; // 소매 노란 줄
     }
     if (ov && ov.short) { g[17][4] = g[17][15] = "s"; } // 반팔: 팔뚝 살 보이게
     if (ov && ov.hood) { // 후드티: 목 둘레 후드 + 끈 + 앞주머니
@@ -1786,6 +1805,14 @@ window.SITE = {
       for (const x of [4, 7, 12, 15]) { g[7][x] = "o"; g[8][x] = "o"; }
       for (const x of [5, 6, 13, 14]) { g[6][x] = "o"; g[9][x] = "o"; }
       g[7][8] = g[7][9] = g[7][10] = g[7][11] = "o";
+    }
+    if (ov && ov.sun) { // 동그란 선글라스
+      for (const [l, r] of [[5, 8], [11, 14]]) {
+        g[7][l] = g[8][l] = g[7][r] = g[8][r] = "o";
+        g[6][l + 1] = g[6][l + 2] = g[9][l + 1] = g[9][l + 2] = "o";
+        g[7][l + 1] = "g"; g[7][l + 2] = g[8][l + 1] = g[8][l + 2] = "G";
+      }
+      g[7][9] = g[7][10] = "o";
     }
     return { g, hat };
   }
@@ -1821,7 +1848,7 @@ window.SITE = {
       cx.fillRect(x * S, y * S, S, S);
     }));
     // 눈 반짝이
-    cx.fillStyle = "#fff"; cx.fillRect(6, 7, 1, 1); cx.fillRect(14, 7, 1, 1);
+    if (!(ov && ov.sun)) { cx.fillStyle = "#fff"; cx.fillRect(6, 7, 1, 1); cx.fillRect(14, 7, 1, 1); }
     return cv.toDataURL();
   }
 
